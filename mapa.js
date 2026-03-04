@@ -97,27 +97,40 @@ document.getElementById("fechar").onclick =
 // 💾 SALVAR ANÚNCIO
 document.getElementById("salvar").onclick = async () => {
 
-  if (!localSelecionado) {
-    alert("Clique no mapa para escolher localização");
-    return;
+  try {
+
+    if (!usuarioAtual) {
+      alert("Usuário não está logado!");
+      return;
+    }
+
+    if (!localSelecionado) {
+      alert("Clique no mapa para escolher localização");
+      return;
+    }
+
+    const docRef = await addDoc(collection(db, "anuncios"), {
+      tipo: document.getElementById("tipo").value,
+      titulo: document.getElementById("titulo").value,
+      descricao: document.getElementById("descricao").value,
+      preco: Number(document.getElementById("preco").value) || null,
+      telefone: document.getElementById("telefone").value,
+      lat: localSelecionado.lat,
+      lng: localSelecionado.lng,
+      uid: usuarioAtual.uid,
+      criadoEm: serverTimestamp()
+    });
+
+    console.log("🔥 Documento salvo com ID:", docRef.id);
+
+    alert("Anúncio salvo com sucesso!");
+
+  } catch (error) {
+    console.error("❌ ERRO AO SALVAR:", error);
+    alert("Erro ao salvar. Veja o console.");
   }
 
-  await addDoc(collection(db, "anuncios"), {
-    tipo: document.getElementById("tipo").value,
-    titulo: document.getElementById("titulo").value,
-    descricao: document.getElementById("descricao").value,
-    preco: Number(document.getElementById("preco").value) || null,
-    telefone: document.getElementById("telefone").value,
-    lat: localSelecionado.lat,
-    lng: localSelecionado.lng,
-    uid: usuarioAtual.uid,
-    criadoEm: serverTimestamp()
-  });
-
-  modal.classList.add("hidden");
-  alert("Anúncio publicado!");
 };
-
 // 🚪 SAIR
 document.getElementById("btnSair").onclick = async () => {
   await signOut(auth);
