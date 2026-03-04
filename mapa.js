@@ -1,32 +1,23 @@
 import { auth, db } from "./firebase.js";
+
 import {
   collection,
-  doc,
-  setDoc,
-  deleteDoc,
-  query,
-  where,
+  addDoc,
   onSnapshot,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-import { 
+import {
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// 🔒 USUÁRIO
-let usuarioAtual = null;
-
-// 🗺️ MAPA
 let map;
 let markers = {};
-let mapaIniciado = false;
+let usuarioAtual = null;
+let localSelecionado = null;
 
-const TRACCAR_URL = "http://localhost:8082/api/positions";
-const TRACCAR_TOKEN = "RzBFAiEA8J7vap4FCNi2vonXHll3ZT8ZB4PCSmOioy2QY-yKax8CIELvg19O9BeMnmJyMnnjX3iFjM78Lv1mtaFu6-Z7638beyJpIjo0MTExMDQ1MjU3MDU1MTUzNzU3LCJ1IjoxLCJlIjoiMjAyNi0wMi0xNVQwMzowMDowMC4wMDArMDA6MDAifQ"; // depois a gente protege isso
-
-// 🔐 VERIFICAR LOGIN
+// 🔐 LOGIN
 onAuthStateChanged(auth, user => {
   if (!user) {
     location.href = "index.html";
@@ -35,209 +26,100 @@ onAuthStateChanged(auth, user => {
 
   usuarioAtual = user;
   iniciarMapa();
-  listarVeiculos();
+  carregarAnuncios();
 });
 
 // 🗺️ INICIAR MAPA
 function iniciarMapa() {
-  if (mapaIniciado) return;
 
-  map = L.map("map", {
-    center: [-23.55, -46.63],
-    zoom: 13,
-    minZoom: 3,
-    worldCopyJump: true
-  });
+  map = L.map("map").setView([-17.79, -50.92], 13); // Rio Verde
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    noWrap: true
+    maxZoom: 19
   }).addTo(map);
 
-  mapaIniciado = true;
-  
-  map.setMaxBounds([
-    [-85, -180],
-    [85, 180]
-  ]);
-
-  // 🔥 FORÇA O REDIMENSIONAMENTO
-  setTimeout(() => {
-    map.invalidateSize();
-  }, 200);
-}
-
-async function carregarPosicoes() {
-  const res = await fetch("http://localhost:8082/api/positions", {
-    headers: {
-      Authorization: "RzBFAiEA8J7vap4FCNi2vonXHll3ZT8ZB4PCSmOioy2QY-yKax8CIELvg19O9BeMnmJyMnnjX3iFjM78Lv1mtaFu6-Z7638beyJpIjo0MTExMDQ1MjU3MDU1MTUzNzU3LCJ1IjoxLCJlIjoiMjAyNi0wMi0xNVQwMzowMDowMC4wMDArMDA6MDAifQ"
-    }
-  });
-
-  const dados = await res.json();
-
-  dados.forEach(pos => {
-    const { latitude, longitude, deviceId } = pos;
-
-    if (!markers[deviceId]) {
-      markers[deviceId] = L.marker([latitude, longitude]).addTo(map);
-    } else {
-      markers[deviceId].setLatLng([latitude, longitude]);
-    }
+  map.on("click", e => {
+    localSelecionado = e.latlng;
+    alert("Localização selecionada!");
   });
 }
 
-// Atualizar a cada 5 segundos
-setInterval(carregarPosicoes, 5000);
+// 🎨 ÍCONES
+const iconePerdido = L.icon({
+  iconUrl: "https://cdn-icons-png.flaticon.com/512/565/565547.png",
+  iconSize: [35, 35]
+});
 
+const iconeCasa = L.icon({
+  iconUrl: "https://cdn-icons-png.flaticon.com/512/25/25694.png",
+  iconSize: [35, 35]
+});
 
-// 📋 MODAL
+// 📡 CARREGAR ANÚNCIOS
+function carregarAnuncios() {
+
+  const ref = collection(db, "anuncios");
+
+  onSnapshot(ref, snapshot => {
+
+    snapshot.forEach(docSnap => {
+
+      const d = docSnap.data();
+      const id = docSnap.id;
+
+      if (markers[id]) return;
+
+      const icone = d.tipo === "perdido"
+        ? iconePerdido
+        : iconeCasa;
+
+      markers[id] = L.marker([d.lat, d.lng], { icon: icone })
+        .addTo(map)
+        .bindPopup(`
+          <strong>${d.titulo}</strong><br>
+          ${d.descricao}<br>
+          ${d.preco ? "💰 R$ " + d.preco + "<br>" : ""}
+          📞 ${d.telefone}
+        `);
+    });
+
+  });
+}
+
+// ➕ MODAL
 const modal = document.getElementById("modal");
-const btnAdd = document.getElementById("btnAdd");
-const btnSalvar = document.getElementById("salvar");
-const btnFechar = document.getElementById("fechar");
+document.getElementById("btnAdd").onclick =
+  () => modal.classList.remove("hidden");
 
-btnAdd.onclick = () => modal.classList.remove("hidden");
-btnFechar.onclick = () => modal.classList.add("hidden");
+document.getElementById("fechar").onclick =
+  () => modal.classList.add("hidden");
 
-// 💾 SALVAR DISPOSITIVO
-btnSalvar.onclick = async () => {
-  const imei = document.getElementById("imei").value.trim();
-  const nome = document.getElementById("nome").value.trim();
-  const placa = document.getElementById("placa").value.trim();
+// 💾 SALVAR ANÚNCIO
+document.getElementById("salvar").onclick = async () => {
 
-  if (!imei || !nome) {
-    alert("Informe IMEI e nome do veículo");
+  if (!localSelecionado) {
+    alert("Clique no mapa para escolher localização");
     return;
   }
 
-  await setDoc(doc(db, "dispositivos", imei), {
+  await addDoc(collection(db, "anuncios"), {
+    tipo: document.getElementById("tipo").value,
+    titulo: document.getElementById("titulo").value,
+    descricao: document.getElementById("descricao").value,
+    preco: Number(document.getElementById("preco").value) || null,
+    telefone: document.getElementById("telefone").value,
+    lat: localSelecionado.lat,
+    lng: localSelecionado.lng,
     uid: usuarioAtual.uid,
-    nome,
-    placa,
     criadoEm: serverTimestamp()
   });
 
   modal.classList.add("hidden");
-  document.getElementById("imei").value = "";
-  document.getElementById("nome").value = "";
-  document.getElementById("placa").value = "";
+  alert("Anúncio publicado!");
 };
 
-// 🚪 BOTÃO SAIR
-const btnSair = document.getElementById("btnSair");
-
-btnSair.onclick = async () => {
-  const ok = confirm("Deseja realmente sair?");
-  if (!ok) return;
-
+// 🚪 SAIR
+document.getElementById("btnSair").onclick = async () => {
   await signOut(auth);
   location.href = "index.html";
 };
-
-
-// 🚗 LISTAR VEÍCULOS
-function listarVeiculos() {
-  const lista = document.getElementById("listaVeiculos");
-
-  const q = query(
-    collection(db, "dispositivos"),
-    where("uid", "==", usuarioAtual.uid)
-  );
-
-  onSnapshot(q, snapshot => {
-    lista.innerHTML = "";
-
-    snapshot.forEach(docSnap => {
-      const d = docSnap.data();
-      const imei = docSnap.id;
-
-      const li = document.createElement("li");
-      li.style.display = "flex";
-      li.style.justifyContent = "space-between";
-      li.style.alignItems = "center";
-
-      // 📄 INFO
-      const info = document.createElement("span");
-      info.textContent = `${d.nome} (${d.placa || "sem placa"})`;
-      info.style.cursor = "pointer";
-      info.onclick = () => ouvirLocalizacao(imei);
-
-      // 🗑 BOTÃO APAGAR
-      const btnDel = document.createElement("button");
-      btnDel.textContent = "🗑";
-      btnDel.style.background = "transparent";
-      btnDel.style.border = "none";
-      btnDel.style.cursor = "pointer";
-      btnDel.style.fontSize = "16px";
-
-      btnDel.onclick = async (e) => {
-        e.stopPropagation();
-
-        const ok = confirm(`Apagar o veículo "${d.nome}"?`);
-        if (!ok) return;
-
-        // 🔥 REMOVE DO FIRESTORE
-        await deleteDoc(doc(db, "dispositivos", imei));
-
-        // 🗺️ REMOVE MARCADOR
-        if (markers[imei]) {
-          map.removeLayer(markers[imei]);
-          delete markers[imei];
-        }
-      };
-
-      li.appendChild(info);
-      li.appendChild(btnDel);
-      lista.appendChild(li);
-    });
-  });
-}
-
-
-// 📡 OUVIR LOCALIZAÇÃO EM TEMPO REAL
-function ouvirLocalizacao(imei) {
-  const ref = doc(db, "localizacoes", imei);
-
-  onSnapshot(ref, snap => {
-    if (!snap.exists()) return;
-
-    const { lat, lng } = snap.data();
-
-    if (!markers[imei]) {
-      markers[imei] = L.marker([lat, lng]).addTo(map);
-    } else {
-      markers[imei].setLatLng([lat, lng]);
-    }
-
-    map.setView([lat, lng], 15);
-  });
-}
-async function carregarPosicoesTraccar() {
-  try {
-    const res = await fetch(TRACCAR_URL, {
-      headers: {
-        Authorization: "Bearer " + TRACCAR_TOKEN
-      }
-    });
-
-    const posicoes = await res.json();
-
-    posicoes.forEach(pos => {
-      const { latitude, longitude, deviceId } = pos;
-
-      if (!markers["traccar_" + deviceId]) {
-        markers["traccar_" + deviceId] =
-          L.marker([latitude, longitude])
-            .addTo(map)
-            .bindPopup("Dispositivo Traccar ID: " + deviceId);
-      } else {
-        markers["traccar_" + deviceId]
-          .setLatLng([latitude, longitude]);
-      }
-    });
-
-  } catch (e) {
-    console.error("Erro Traccar:", e);
-  }
-}
