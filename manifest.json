@@ -1,0 +1,27 @@
+{
+  "name": "Qmap Rastreamento",
+  "short_name": "Qmap",
+  "start_url": "./QMap/index.html",
+  "display": "standalone",
+  "background_color": "#b30000",
+  "theme_color": "#b30000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+
+
+
+
+
+

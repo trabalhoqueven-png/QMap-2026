@@ -1,0 +1,123 @@
+/* RESET */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* BODY */
+body.inicio {
+  min-height: 100vh;
+  font-family: 'Segoe UI', Arial, sans-serif;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 16px;
+
+  background: radial-gradient(circle at top, #550000, #0b0000 70%);
+}
+
+/* CAIXA LOGIN */
+.login-box {
+  width: 100%;
+  max-width: 380px;
+
+  padding: 28px;
+  text-align: center;
+
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,0.75),
+    rgba(40,0,0,0.85)
+  );
+
+  border-radius: 22px;
+  position: relative;
+
+  box-shadow:
+    0 0 0 1px rgba(255,77,77,0.25),
+    0 20px 60px rgba(0,0,0,0.8);
+}
+
+/* TÍTULO */
+.login-box h2 {
+  color: #ff4d4d;
+  margin-bottom: 24px;
+  font-size: 1.4rem;
+}
+
+/* INPUT */
+.input-box {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.input-box input {
+  width: 100%;
+  padding: 14px 14px 14px 44px;
+
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 14px;
+
+  color: #fff;
+  font-size: 16px;
+}
+
+.input-box i {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255,255,255,0.6);
+}
+
+/* BOTÕES */
+.btn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* LOGIN */
+.btn.login {
+  background: linear-gradient(135deg, #ff4d4d, #7a0000);
+  color: #fff;
+  border: none;
+}
+
+/* CADASTRO */
+.btn.cadastro {
+  background: transparent;
+  border: 1px solid #ff4d4d;
+  color: #ff4d4d;
+}
+
+/* CONTATO */
+.contato {
+  margin-top: 22px;
+}
+
+.contato p {
+  color: #ffb3b3;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+/* MOBILE EXTRA */
+@media (max-width: 360px) {
+  .login-box {
+    padding: 22px;
+  }
+
+  .login-box h2 {
+    font-size: 1.2rem;
+  }
+}

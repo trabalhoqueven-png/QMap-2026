@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Plataforma de Rastreamento</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>🚗 Meus Veículos</h2>
+  <button id="btnAdd" class="btn-add">➕ Adicionar dispositivo</button>
+  <button id="btnSair" class="btn-sair">🚪 Sair</button>
+  <ul id="listaVeiculos"></ul>
+</div>
+<!-- MODAL -->
+<div id="modal" class="modal hidden">
+  <div class="modal-content">
+    <h3>Adicionar dispositivo</h3>
+
+    <input id="imei" placeholder="IMEI do GPS">
+    <input id="nome" placeholder="Nome do veículo">
+    <input id="placa" placeholder="Placa">
+
+    <button id="salvar">Salvar</button>
+    <button id="fechar">Cancelar</button>
+  </div>
+</div>
+  
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script type="module" src="mapa.js"></script>
+</body>
+</html>
