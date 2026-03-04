@@ -2,35 +2,44 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Plataforma de Rastreamento</title>
+  <title>Mapa de Perdidos e Aluguel</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 </head>
 <body>
 
 <div class="sidebar">
-  <h2>🚗 Meus Veículos</h2>
-  <button id="btnAdd" class="btn-add">➕ Adicionar dispositivo</button>
+  <h2>🗺️ Anúncios</h2>
+  <button id="btnAdd" class="btn-add">➕ Novo anúncio</button>
   <button id="btnSair" class="btn-sair">🚪 Sair</button>
-  <ul id="listaVeiculos"></ul>
 </div>
+
 <!-- MODAL -->
 <div id="modal" class="modal hidden">
   <div class="modal-content">
-    <h3>Adicionar dispositivo</h3>
+    <h3>Novo anúncio</h3>
 
-    <input id="imei" placeholder="IMEI do GPS">
-    <input id="nome" placeholder="Nome do veículo">
-    <input id="placa" placeholder="Placa">
+    <select id="tipo">
+      <option value="perdido">Item Perdido</option>
+      <option value="aluguel">Casa para Alugar</option>
+    </select>
+
+    <input id="titulo" placeholder="Título">
+    <textarea id="descricao" placeholder="Descrição"></textarea>
+    <input id="preco" placeholder="Preço (se aluguel)">
+    <input id="telefone" placeholder="Telefone">
+
+    <p style="font-size:12px">Clique no mapa para escolher localização</p>
 
     <button id="salvar">Salvar</button>
     <button id="fechar">Cancelar</button>
   </div>
 </div>
-  
+
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script type="module" src="mapa.js"></script>
+
 </body>
 </html>
