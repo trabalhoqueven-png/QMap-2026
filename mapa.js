@@ -20,11 +20,9 @@ let usuarioAtual = null;
 onAuthStateChanged(auth, (user) => {
 
   if (!user) {
-    // Se não estiver logado volta pro login
     window.location.replace("index.html");
   } else {
     usuarioAtual = user;
-    console.log("Logado com UID:", user.uid);
   }
 
 });
@@ -34,14 +32,8 @@ const btnSair = document.getElementById("btnSair");
 
 if (btnSair) {
   btnSair.addEventListener("click", async () => {
-
-    try {
-      await signOut(auth);
-      window.location.replace("index.html");
-    } catch (error) {
-      console.error("Erro ao sair:", error);
-    }
-
+    await signOut(auth);
+    window.location.replace("index.html");
   });
 }
 
@@ -59,6 +51,18 @@ const modal = document.getElementById("modal");
 const btnAdd = document.getElementById("btnAdd");
 const btnFechar = document.getElementById("fechar");
 const btnSalvar = document.getElementById("salvar");
+
+const inputPreco = document.getElementById("preco");
+const inputTelefone = document.getElementById("telefone");
+
+/* 🔒 BLOQUEAR LETRAS ENQUANTO DIGITA */
+inputPreco.addEventListener("input", () => {
+  inputPreco.value = inputPreco.value.replace(/\D/g, "");
+});
+
+inputTelefone.addEventListener("input", () => {
+  inputTelefone.value = inputTelefone.value.replace(/\D/g, "");
+});
 
 btnAdd.onclick = () => modal.classList.remove("hidden");
 btnFechar.onclick = () => modal.classList.add("hidden");
@@ -91,8 +95,10 @@ btnSalvar.addEventListener("click", async () => {
   const tipo = document.getElementById("tipo").value;
   const titulo = document.getElementById("titulo").value;
   const descricao = document.getElementById("descricao").value;
-  const preco = document.getElementById("preco").value;
-  const telefone = document.getElementById("telefone").value;
+
+  // 🔐 SEGURANÇA EXTRA
+  const precoLimpo = inputPreco.value.replace(/\D/g, "");
+  const telefoneLimpo = inputTelefone.value.replace(/\D/g, "");
 
   try {
 
@@ -100,8 +106,8 @@ btnSalvar.addEventListener("click", async () => {
       tipo,
       titulo,
       descricao,
-      preco,
-      telefone,
+      preco: precoLimpo ? Number(precoLimpo) : null,
+      telefone: telefoneLimpo,
       lat: localSelecionado.lat,
       lng: localSelecionado.lng,
       uid: usuarioAtual.uid,
@@ -109,7 +115,15 @@ btnSalvar.addEventListener("click", async () => {
     });
 
     alert("Salvo com sucesso!");
+
     modal.classList.add("hidden");
+
+    // limpar campos
+    document.getElementById("titulo").value = "";
+    document.getElementById("descricao").value = "";
+    inputPreco.value = "";
+    inputTelefone.value = "";
+    localSelecionado = null;
 
   } catch (e) {
     console.error("ERRO AO SALVAR:", e);
@@ -149,7 +163,7 @@ function carregarAnuncios() {
           return `
             <strong>${d.titulo}</strong><br>
             ${d.descricao}<br>
-            💰 ${d.preco || "-"}<br>
+            💰 ${d.preco ? "R$ " + d.preco : "-"}<br>
             📞 ${d.telefone}
             ${botoes}
           `;
@@ -165,9 +179,7 @@ carregarAnuncios();
 
 /* 🗑 EXCLUIR */
 window.excluir = async (id) => {
-
   if (!confirm("Deseja excluir este anúncio?")) return;
-
   await deleteDoc(doc(db, "anuncios", id));
 };
 
