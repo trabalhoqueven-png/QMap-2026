@@ -136,3 +136,4 @@ document.getElementById("btnSair").onclick = async () => {
   await signOut(auth);
   location.href = "index.html";
 };
+console.log("DB:", db);
