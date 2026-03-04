@@ -97,19 +97,21 @@ document.getElementById("fechar").onclick =
 // 💾 SALVAR ANÚNCIO
 document.getElementById("salvar").onclick = async () => {
 
-  console.log("Tentando salvar...");
+  console.log("DB TESTE:", db);
+
+  console.log("Collection TESTE:", collection(db, "teste"));
 
   try {
 
     const docRef = await addDoc(collection(db, "teste"), {
-      nome: "Teste",
-      data: serverTimestamp()
+      nome: "Teste direto",
+      data: new Date()
     });
 
-    console.log("SALVO COM ID:", docRef.id);
+    console.log("SALVOU MESMO:", docRef.id);
 
   } catch (error) {
-    console.error("ERRO:", error);
+    console.error("ERRO REAL:", error);
   }
 
 };
