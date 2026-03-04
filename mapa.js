@@ -99,35 +99,22 @@ document.getElementById("salvar").onclick = async () => {
 
   try {
 
-    if (!usuarioAtual) {
-      alert("Usuário não está logado!");
-      return;
-    }
-
-    if (!localSelecionado) {
-      alert("Clique no mapa para escolher localização");
-      return;
-    }
-
     const docRef = await addDoc(collection(db, "anuncios"), {
-      tipo: document.getElementById("tipo").value,
-      titulo: document.getElementById("titulo").value,
-      descricao: document.getElementById("descricao").value,
-      preco: Number(document.getElementById("preco").value) || null,
-      telefone: document.getElementById("telefone").value,
-      lat: localSelecionado.lat,
-      lng: localSelecionado.lng,
-      uid: usuarioAtual.uid,
+      tipo: "teste",
+      titulo: "Teste fixo",
+      descricao: "Teste descrição",
+      preco: null,
+      telefone: "0000",
+      lat: -17.79,
+      lng: -50.92,
+      uid: "teste",
       criadoEm: serverTimestamp()
     });
 
-    console.log("🔥 Documento salvo com ID:", docRef.id);
-
-    alert("Anúncio salvo com sucesso!");
+    console.log("SALVOU:", docRef.id);
 
   } catch (error) {
-    console.error("❌ ERRO AO SALVAR:", error);
-    alert("Erro ao salvar. Veja o console.");
+    console.error("ERRO AO SALVAR:", error);
   }
 
 };
