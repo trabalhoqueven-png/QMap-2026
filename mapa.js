@@ -97,24 +97,19 @@ document.getElementById("fechar").onclick =
 // 💾 SALVAR ANÚNCIO
 document.getElementById("salvar").onclick = async () => {
 
+  console.log("Tentando salvar...");
+
   try {
 
-    const docRef = await addDoc(collection(db, "anuncios"), {
-      tipo: "teste",
-      titulo: "Teste fixo",
-      descricao: "Teste descrição",
-      preco: null,
-      telefone: "0000",
-      lat: -17.79,
-      lng: -50.92,
-      uid: "teste",
-      criadoEm: serverTimestamp()
+    const docRef = await addDoc(collection(db, "teste"), {
+      nome: "Teste",
+      data: serverTimestamp()
     });
 
-    console.log("SALVOU:", docRef.id);
+    console.log("SALVO COM ID:", docRef.id);
 
   } catch (error) {
-    console.error("ERRO AO SALVAR:", error);
+    console.error("ERRO:", error);
   }
 
 };
