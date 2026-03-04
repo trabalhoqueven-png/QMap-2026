@@ -35,15 +35,19 @@ if (btnSair) {
   });
 }
 
-/* 🗺 MAPA */
-let map = L.map("map").setView([-17.8, -50.9], 13);
+// 🗺 Inicializa mapa somente uma vez
+let mapContainer = document.getElementById("map");
+if (!mapContainer._leaflet_id) { // evita duplicação
+  var map = L.map("map").setView([-17.8, -50.9], 13);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap"
+  }).addTo(map);
+}
+
+// Variáveis do mapa
 let marcadorTemporario = null;
 let localSelecionado = null;
 let markers = {};
-
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "© OpenStreetMap"
-}).addTo(map);
 
 const modal = document.getElementById("modal");
 const btnAdd = document.getElementById("btnAdd");
