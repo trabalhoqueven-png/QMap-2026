@@ -1,24 +1,6 @@
 import { db } from "./firebase.js";
 import { collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-console.log("TESTE INICIADO");
-
-async function testeForcado() {
-  try {
-    const ref = await addDoc(collection(db, "testeForcado"), {
-      nome: "funcionando",
-      data: new Date()
-    });
-
-    console.log("SALVOU COM ID:", ref.id);
-
-  } catch (e) {
-    console.error("ERRO REAL:", e);
-  }
-}
-
-testeForcado();
-
 let map = L.map("map").setView([-17.8, -50.9], 13);
 let marcadorTemporario = null;
 let localSelecionado = null;
