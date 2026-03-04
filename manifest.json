@@ -1,7 +1,7 @@
 {
   "name": "Qmap Rastreamento",
   "short_name": "Qmap",
-  "start_url": "./QMap/index.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#b30000",
   "theme_color": "#b30000",
@@ -19,9 +19,3 @@
     }
   ]
 }
-
-
-
-
-
-
