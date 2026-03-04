@@ -17,7 +17,6 @@ let markers = {};
 let usuarioAtual = null;
 let localSelecionado = null;
 
-// 🔐 LOGIN
 onAuthStateChanged(auth, user => {
   if (!user) {
     location.href = "index.html";
@@ -29,10 +28,8 @@ onAuthStateChanged(auth, user => {
   carregarAnuncios();
 });
 
-// 🗺️ INICIAR MAPA
 function iniciarMapa() {
-
-  map = L.map("map").setView([-17.79, -50.92], 13); // Rio Verde
+  map = L.map("map").setView([-17.79, -50.92], 13);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19
@@ -44,20 +41,7 @@ function iniciarMapa() {
   });
 }
 
-// 🎨 ÍCONES
-const iconePerdido = L.icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/565/565547.png",
-  iconSize: [35, 35]
-});
-
-const iconeCasa = L.icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/25/25694.png",
-  iconSize: [35, 35]
-});
-
-// 📡 CARREGAR ANÚNCIOS
 function carregarAnuncios() {
-
   const ref = collection(db, "anuncios");
 
   onSnapshot(ref, snapshot => {
@@ -69,16 +53,11 @@ function carregarAnuncios() {
 
       if (markers[id]) return;
 
-      const icone = d.tipo === "perdido"
-        ? iconePerdido
-        : iconeCasa;
-
-      markers[id] = L.marker([d.lat, d.lng], { icon: icone })
+      markers[id] = L.marker([d.lat, d.lng])
         .addTo(map)
         .bindPopup(`
           <strong>${d.titulo}</strong><br>
           ${d.descricao}<br>
-          ${d.preco ? "💰 R$ " + d.preco + "<br>" : ""}
           📞 ${d.telefone}
         `);
     });
@@ -86,38 +65,36 @@ function carregarAnuncios() {
   });
 }
 
-// ➕ MODAL
-const modal = document.getElementById("modal");
-document.getElementById("btnAdd").onclick =
-  () => modal.classList.remove("hidden");
-
-document.getElementById("fechar").onclick =
-  () => modal.classList.add("hidden");
-
-// 💾 SALVAR ANÚNCIO
 document.getElementById("salvar").onclick = async () => {
 
-  console.log("DB TESTE:", db);
-
-  console.log("Collection TESTE:", collection(db, "teste"));
+  if (!localSelecionado) {
+    alert("Clique no mapa primeiro!");
+    return;
+  }
 
   try {
 
-    const docRef = await addDoc(collection(db, "teste"), {
-      nome: "Teste direto",
-      data: new Date()
+    await addDoc(collection(db, "anuncios"), {
+      titulo: document.getElementById("titulo").value,
+      descricao: document.getElementById("descricao").value,
+      telefone: document.getElementById("telefone").value,
+      lat: localSelecionado.lat,
+      lng: localSelecionado.lng,
+      uid: usuarioAtual.uid,
+      criadoEm: serverTimestamp()
     });
 
-    console.log("SALVOU MESMO:", docRef.id);
+    alert("Salvo com sucesso!");
+
+    location.reload();
 
   } catch (error) {
-    console.error("ERRO REAL:", error);
+    console.error("Erro real:", error);
+    alert("Erro ao salvar.");
   }
-
 };
-// 🚪 SAIR
+
 document.getElementById("btnSair").onclick = async () => {
   await signOut(auth);
   location.href = "index.html";
 };
-console.log("DB:", db);
