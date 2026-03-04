@@ -1,5 +1,27 @@
-import { db } from "./firebase.js";
-import { collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { auth, db } from "./firebase.js";
+import { 
+  collection, 
+  addDoc, 
+  onSnapshot, 
+  doc, 
+  deleteDoc, 
+  updateDoc 
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+import { signInAnonymously, onAuthStateChanged } 
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+// LOGIN ANÔNIMO AUTOMÁTICO
+signInAnonymously(auth);
+
+let usuarioAtual = null;
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    usuarioAtual = user;
+    console.log("Logado com UID:", user.uid);
+  }
+});
 
 let map = L.map("map").setView([-17.8, -50.9], 13);
 let marcadorTemporario = null;
@@ -18,6 +40,7 @@ const btnSalvar = document.getElementById("salvar");
 btnAdd.onclick = () => modal.classList.remove("hidden");
 btnFechar.onclick = () => modal.classList.add("hidden");
 
+// Selecionar ponto no mapa
 map.on("click", (e) => {
 
   localSelecionado = e.latlng;
@@ -29,10 +52,16 @@ map.on("click", (e) => {
   marcadorTemporario = L.marker(e.latlng).addTo(map);
 });
 
+// SALVAR ANÚNCIO
 btnSalvar.addEventListener("click", async () => {
 
   if (!localSelecionado) {
     alert("Clique no mapa primeiro!");
+    return;
+  }
+
+  if (!usuarioAtual) {
+    alert("Usuário ainda não autenticado.");
     return;
   }
 
@@ -52,11 +81,11 @@ btnSalvar.addEventListener("click", async () => {
       telefone,
       lat: localSelecionado.lat,
       lng: localSelecionado.lng,
+      uid: usuarioAtual.uid,
       criadoEm: new Date()
     });
 
     alert("Salvo com sucesso!");
-
     modal.classList.add("hidden");
 
   } catch (e) {
@@ -65,6 +94,7 @@ btnSalvar.addEventListener("click", async () => {
 
 });
 
+// CARREGAR ANÚNCIOS
 function carregarAnuncios() {
 
   const ref = collection(db, "anuncios");
@@ -81,12 +111,26 @@ function carregarAnuncios() {
 
       markers[id] = L.marker([d.lat, d.lng])
         .addTo(map)
-        .bindPopup(`
-          <strong>${d.titulo}</strong><br>
-          ${d.descricao}<br>
-          💰 ${d.preco || "-"}<br>
-          📞 ${d.telefone}
-        `);
+        .bindPopup(() => {
+
+          let botoes = "";
+
+          if (usuarioAtual && usuarioAtual.uid === d.uid) {
+            botoes = `
+              <br><br>
+              <button onclick="editar('${id}')">✏️ Editar</button>
+              <button onclick="excluir('${id}')">🗑 Excluir</button>
+            `;
+          }
+
+          return `
+            <strong>${d.titulo}</strong><br>
+            ${d.descricao}<br>
+            💰 ${d.preco || "-"}<br>
+            📞 ${d.telefone}
+            ${botoes}
+          `;
+        });
 
     });
 
@@ -95,3 +139,22 @@ function carregarAnuncios() {
 }
 
 carregarAnuncios();
+
+// EXCLUIR
+window.excluir = async (id) => {
+
+  if (!confirm("Deseja excluir este anúncio?")) return;
+
+  await deleteDoc(doc(db, "anuncios", id));
+};
+
+// EDITAR
+window.editar = async (id) => {
+
+  const novoTitulo = prompt("Novo título:");
+  if (!novoTitulo) return;
+
+  await updateDoc(doc(db, "anuncios", id), {
+    titulo: novoTitulo
+  });
+};
