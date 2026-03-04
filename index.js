@@ -21,12 +21,6 @@ const msgEl = document.getElementById("msg");
 const btnLogin = document.getElementById("btnLogin");
 const btnCadastro = document.getElementById("btnCadastro");
 
-// 🔹 EVENTOS
-btnLogin.addEventListener("click", login);
-btnCadastro.addEventListener("click", cadastrar);
-
-let deferredPrompt;
-
 // 🔹 FUNÇÃO DE MENSAGEM
 function msg(texto, cor) {
   msgEl.innerText = texto;
@@ -35,6 +29,11 @@ function msg(texto, cor) {
 
 // 🔐 LOGIN
 async function login() {
+  if (!email.value || !senha.value) {
+    msg("Preencha email e senha.", "red");
+    return;
+  }
+
   try {
     const cred = await signInWithEmailAndPassword(
       auth,
@@ -48,14 +47,20 @@ async function login() {
       return;
     }
 
-    location.replace("mapa.html"); // AQUI
+    location.replace("mapa.html");
 
   } catch (e) {
     msg("❌ Email ou senha inválidos.", "red");
   }
 }
+
 // 🆕 CADASTRO
 async function cadastrar() {
+  if (!email.value || !senha.value) {
+    msg("Preencha email e senha.", "red");
+    return;
+  }
+
   try {
     const cred = await createUserWithEmailAndPassword(
       auth,
@@ -79,12 +84,20 @@ async function cadastrar() {
   }
 }
 
-// 🚧 BLOQUEAR USUÁRIO LOGADO
+// 🔹 EVENTOS
+btnLogin.addEventListener("click", login);
+btnCadastro.addEventListener("click", cadastrar);
+
+// 🚧 BLOQUEAR LOGIN SE JÁ ESTIVER LOGADO
 onAuthStateChanged(auth, user => {
   if (user && user.emailVerified) {
-    location.href = "mapa.html";
+    location.replace("mapa.html");
   }
 });
+
+/* =========================
+   PWA / SERVICE WORKER
+========================= */
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js")
@@ -92,10 +105,11 @@ if ("serviceWorker" in navigator) {
     .catch(err => console.log("Erro no SW", err));
 }
 
+let deferredPrompt;
+
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  console.log("Pode instalar!");
 
   const btn = document.createElement("button");
   btn.innerText = "Instalar App";
@@ -107,10 +121,15 @@ window.addEventListener("beforeinstallprompt", (e) => {
   btn.style.color = "#fff";
   btn.style.border = "none";
   btn.style.borderRadius = "8px";
+  btn.style.cursor = "pointer";
 
   document.body.appendChild(btn);
 
-  btn.addEventListener("click", () => {
-    deferredPrompt.prompt();
+  btn.addEventListener("click", async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt = null;
+      btn.remove();
+    }
   });
 });
