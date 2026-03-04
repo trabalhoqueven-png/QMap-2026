@@ -48,13 +48,12 @@ async function login() {
       return;
     }
 
-    location.href = "mapa.html";
+    location.replace("mapa.html"); // AQUI
 
   } catch (e) {
     msg("❌ Email ou senha inválidos.", "red");
   }
 }
-
 // 🆕 CADASTRO
 async function cadastrar() {
   try {
