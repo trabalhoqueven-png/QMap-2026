@@ -1,4 +1,5 @@
 import { auth, db } from "./firebase.js";
+
 import { 
   collection, 
   addDoc, 
@@ -8,21 +9,43 @@ import {
   updateDoc 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-import { signInAnonymously, onAuthStateChanged } 
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-// LOGIN ANÔNIMO AUTOMÁTICO
-signInAnonymously(auth);
+import { 
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 let usuarioAtual = null;
 
+/* 🔐 PROTEÇÃO DE PÁGINA */
 onAuthStateChanged(auth, (user) => {
-  if (user) {
+
+  if (!user) {
+    // Se não estiver logado volta pro login
+    window.location.replace("index.html");
+  } else {
     usuarioAtual = user;
     console.log("Logado com UID:", user.uid);
   }
+
 });
 
+/* 🚪 BOTÃO SAIR */
+const btnSair = document.getElementById("btnSair");
+
+if (btnSair) {
+  btnSair.addEventListener("click", async () => {
+
+    try {
+      await signOut(auth);
+      window.location.replace("index.html");
+    } catch (error) {
+      console.error("Erro ao sair:", error);
+    }
+
+  });
+}
+
+/* 🗺 MAPA */
 let map = L.map("map").setView([-17.8, -50.9], 13);
 let marcadorTemporario = null;
 let localSelecionado = null;
@@ -40,7 +63,7 @@ const btnSalvar = document.getElementById("salvar");
 btnAdd.onclick = () => modal.classList.remove("hidden");
 btnFechar.onclick = () => modal.classList.add("hidden");
 
-// Selecionar ponto no mapa
+/* 📍 Selecionar ponto */
 map.on("click", (e) => {
 
   localSelecionado = e.latlng;
@@ -52,7 +75,7 @@ map.on("click", (e) => {
   marcadorTemporario = L.marker(e.latlng).addTo(map);
 });
 
-// SALVAR ANÚNCIO
+/* 💾 SALVAR ANÚNCIO */
 btnSalvar.addEventListener("click", async () => {
 
   if (!localSelecionado) {
@@ -61,7 +84,7 @@ btnSalvar.addEventListener("click", async () => {
   }
 
   if (!usuarioAtual) {
-    alert("Usuário ainda não autenticado.");
+    alert("Usuário não autenticado.");
     return;
   }
 
@@ -94,7 +117,7 @@ btnSalvar.addEventListener("click", async () => {
 
 });
 
-// CARREGAR ANÚNCIOS
+/* 📡 CARREGAR ANÚNCIOS */
 function carregarAnuncios() {
 
   const ref = collection(db, "anuncios");
@@ -140,7 +163,7 @@ function carregarAnuncios() {
 
 carregarAnuncios();
 
-// EXCLUIR
+/* 🗑 EXCLUIR */
 window.excluir = async (id) => {
 
   if (!confirm("Deseja excluir este anúncio?")) return;
@@ -148,7 +171,7 @@ window.excluir = async (id) => {
   await deleteDoc(doc(db, "anuncios", id));
 };
 
-// EDITAR
+/* ✏️ EDITAR */
 window.editar = async (id) => {
 
   const novoTitulo = prompt("Novo título:");
