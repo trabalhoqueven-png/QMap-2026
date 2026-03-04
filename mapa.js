@@ -98,3 +98,14 @@ document.getElementById("btnSair").onclick = async () => {
   await signOut(auth);
   location.href = "index.html";
 };
+const modal = document.getElementById("modal");
+const btnAdd = document.getElementById("btnAdd");
+const btnFechar = document.getElementById("fechar");
+
+btnAdd.addEventListener("click", () => {
+  modal.classList.remove("hidden");
+});
+
+btnFechar.addEventListener("click", () => {
+  modal.classList.add("hidden");
+});
