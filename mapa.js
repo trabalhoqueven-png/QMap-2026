@@ -4,7 +4,8 @@ import {
   collection, 
   addDoc, 
   onSnapshot, 
-  doc, 
+  doc,
+  getDoc,
   deleteDoc, 
   updateDoc 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -15,15 +16,43 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 let usuarioAtual = null;
+let coins = 0;
+let marcacoesGratis = 0;
 
 /* 🔐 PROTEÇÃO DE PÁGINA */
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
+
   if (!user) {
     window.location.replace("index.html");
-  } else {
-    usuarioAtual = user;
+    return;
   }
+
+  usuarioAtual = user;
+
+  const ref = doc(db,"usuarios",user.uid);
+  const snap = await getDoc(ref);
+
+  if(snap.exists()){
+
+    coins = snap.data().coins || 0;
+    marcacoesGratis = snap.data().marcacoesGratis || 0;
+
+    atualizarPainel();
+
+  }
+
 });
+
+/* 🪙 PAINEL COINS */
+function atualizarPainel(){
+
+  const elCoins = document.getElementById("coins");
+  const elGratis = document.getElementById("gratis");
+
+  if(elCoins) elCoins.innerText = coins;
+  if(elGratis) elGratis.innerText = marcacoesGratis;
+
+}
 
 /* 🚪 BOTÃO SAIR */
 const btnSair = document.getElementById("btnSair");
@@ -53,14 +82,11 @@ const btnSalvar = document.getElementById("salvar");
 const inputPreco = document.getElementById("preco");
 const inputTelefone = document.getElementById("telefone");
 
-/* =========================
-   📞 FORMATA TELEFONE
-========================= */
+/* 📞 TELEFONE */
 inputTelefone.addEventListener("input", () => {
 
   let numeros = inputTelefone.value.replace(/\D/g, "");
-
-  numeros = numeros.substring(0, 11); // limite 11 dígitos
+  numeros = numeros.substring(0, 11);
 
   if (numeros.length > 6) {
     inputTelefone.value =
@@ -76,14 +102,11 @@ inputTelefone.addEventListener("input", () => {
 
 });
 
-/* =========================
-   💰 FORMATA PREÇO
-========================= */
+/* 💰 PREÇO */
 inputPreco.addEventListener("input", () => {
 
   let numeros = inputPreco.value.replace(/\D/g, "");
-
-  numeros = numeros.substring(0, 9); // limite milhões
+  numeros = numeros.substring(0, 9);
 
   if (!numeros) {
     inputPreco.value = "";
@@ -95,12 +118,14 @@ inputPreco.addEventListener("input", () => {
   valor = valor.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
   inputPreco.value = valor;
+
 });
 
+/* 📍 ABRIR MODAL */
 btnAdd.onclick = () => modal.classList.remove("hidden");
 btnFechar.onclick = () => modal.classList.add("hidden");
 
-/* 📍 Selecionar ponto */
+/* 📍 CLICAR NO MAPA */
 map.on("click", (e) => {
 
   localSelecionado = e.latlng;
@@ -110,9 +135,10 @@ map.on("click", (e) => {
   }
 
   marcadorTemporario = L.marker(e.latlng).addTo(map);
+
 });
 
-/* 💾 SALVAR ANÚNCIO */
+/* 💾 SALVAR ANÚNCIO + SISTEMA DE COINS */
 btnSalvar.addEventListener("click", async () => {
 
   if (!localSelecionado) {
@@ -123,6 +149,23 @@ btnSalvar.addEventListener("click", async () => {
   if (!usuarioAtual) {
     alert("Usuário não autenticado.");
     return;
+  }
+
+  /* 🔒 SISTEMA DE LIMITE */
+
+  if(marcacoesGratis > 0){
+
+    marcacoesGratis--;
+
+  } else {
+
+    if(coins <= 0){
+      alert("Você não tem coins!");
+      return;
+    }
+
+    coins--;
+
   }
 
   const tipo = document.getElementById("tipo").value;
@@ -146,7 +189,16 @@ btnSalvar.addEventListener("click", async () => {
       criadoEm: new Date()
     });
 
-    alert("Salvo com sucesso!");
+    /* atualizar coins */
+
+    await updateDoc(doc(db,"usuarios",usuarioAtual.uid),{
+      coins: coins,
+      marcacoesGratis: marcacoesGratis
+    });
+
+    atualizarPainel();
+
+    alert("Anúncio criado!");
 
     modal.classList.add("hidden");
 
@@ -154,10 +206,11 @@ btnSalvar.addEventListener("click", async () => {
     document.getElementById("descricao").value = "";
     inputPreco.value = "";
     inputTelefone.value = "";
+
     localSelecionado = null;
 
   } catch (e) {
-    console.error("ERRO AO SALVAR:", e);
+    console.error("ERRO:", e);
   }
 
 });
@@ -239,4 +292,5 @@ window.editar = async (id) => {
   await updateDoc(doc(db, "anuncios", id), {
     titulo: novoTitulo
   });
+
 };
