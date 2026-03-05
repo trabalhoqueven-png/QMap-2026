@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="index.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="manifest" href="manifest.json">
-
 </head>
 <body class="inicio">
 
@@ -16,34 +15,36 @@
   <h2>Entrar Na Plataforma</h2>
 
   <div class="input-box">
-  <i class="fa-solid fa-envelope"></i>
-  <input id="email" type="email" placeholder="Email">
-</div>
+    <i class="fa-solid fa-envelope"></i>
+    <input id="email" type="email" placeholder="Email">
+  </div>
 
-<div class="input-box">
-  <i class="fa-solid fa-lock"></i>
-  <input id="senha" type="password" placeholder="Senha">
-
-</div>
+  <div class="input-box">
+    <i class="fa-solid fa-lock"></i>
+    <input id="senha" type="password" placeholder="Senha">
+  </div>
 
   <button id="btnLogin" class="btn login">Login</button>
   <button id="btnCadastro" class="btn cadastro">Cadastrar</button>
   <p id="msg"></p>
-  
-<!-- CONTATO -->
-    <div class="contato">
-      <p>Contato</p>
 
-      <a href="https://wa.me/5564974008793" target="_blank" class="btn-contato whatsapp">
-        <i class="fa-brands fa-whatsapp"></i> WhatsApp
-      </a>
+  <!-- CONTATO -->
+  <div class="contato">
+    <p>Contato</p>
+    <a href="https://wa.me/5564974008793" target="_blank" class="btn-contato whatsapp">
+      <i class="fa-brands fa-whatsapp"></i> WhatsApp
+    </a>
+    <a href="https://www.instagram.com/queven_reis" target="_blank" class="btn-contato instagram">
+      <i class="fa-brands fa-instagram"></i> Instagram
+    </a>
+    <p id="ifo">PRDC - QSystems</p>
+  </div>
+</div>
 
-      <a href="https://www.instagram.com/queven_reis"target="_blank" class="btn-contato instagram">
-        <i class="fa-brands fa-instagram"></i> Instagram
-      </a>
-      <p id="ifo">PRDC - QSystems</p>
-    </div>
-
+<!-- TELA DE CARREGAMENTO -->
+<div id="loading" class="loading" style="display: none;">
+  <div class="spinner"></div>
+  <p>Carregando...</p>
 </div>
 
 <script type="module" src="index.js"></script>
