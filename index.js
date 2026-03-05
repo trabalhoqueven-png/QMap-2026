@@ -31,10 +31,14 @@ function msg(texto, cor) {
 // 🔹 FUNÇÃO LOADING
 function mostrarLoading() {
   loading.style.display = "flex";
+  btnLogin.disabled = true;
+  btnCadastro.disabled = true;
 }
 
 function esconderLoading() {
   loading.style.display = "none";
+  btnLogin.disabled = false;
+  btnCadastro.disabled = false;
 }
 
 // 🔐 LOGIN
@@ -45,7 +49,7 @@ async function login() {
   }
 
   try {
-    mostrarLoading(); // mostrar tela de carregamento
+    mostrarLoading();
     const cred = await signInWithEmailAndPassword(auth, email.value, senha.value);
 
     if (!cred.user.emailVerified) {
@@ -59,7 +63,7 @@ async function login() {
   } catch (e) {
     msg("❌ Email ou senha inválidos.", "red");
   } finally {
-    esconderLoading(); // sempre esconde loading
+    esconderLoading();
   }
 }
 
@@ -121,7 +125,6 @@ if ("serviceWorker" in navigator) {
 }
 
 let deferredPrompt;
-
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
