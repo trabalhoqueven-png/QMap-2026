@@ -88,6 +88,15 @@ async function cadastrar() {
 btnLogin.addEventListener("click", login);
 btnCadastro.addEventListener("click", cadastrar);
 
+// 🔹 ATIVAR LOGIN COM ENTER
+[email, senha].forEach(input => {
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      login();
+    }
+  });
+});
+
 // 🚧 BLOQUEAR LOGIN SE JÁ ESTIVER LOGADO
 onAuthStateChanged(auth, user => {
   if (user && user.emailVerified) {
