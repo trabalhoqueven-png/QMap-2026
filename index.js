@@ -82,7 +82,7 @@ async function cadastrar() {
     await setDoc(doc(db, "usuarios", cred.user.uid), {
     email: cred.user.email,
     criadoEm: serverTimestamp(),
-    coins: 5,
+    coins: 0,
     marcacoesGratis: 2
 });
 
