@@ -20,11 +20,21 @@ const senha = document.getElementById("senha");
 const msgEl = document.getElementById("msg");
 const btnLogin = document.getElementById("btnLogin");
 const btnCadastro = document.getElementById("btnCadastro");
+const loading = document.getElementById("loading");
 
 // 🔹 FUNÇÃO DE MENSAGEM
 function msg(texto, cor) {
   msgEl.innerText = texto;
   msgEl.style.color = cor;
+}
+
+// 🔹 FUNÇÃO LOADING
+function mostrarLoading() {
+  loading.style.display = "flex";
+}
+
+function esconderLoading() {
+  loading.style.display = "none";
 }
 
 // 🔐 LOGIN
@@ -35,11 +45,8 @@ async function login() {
   }
 
   try {
-    const cred = await signInWithEmailAndPassword(
-      auth,
-      email.value,
-      senha.value
-    );
+    mostrarLoading(); // mostrar tela de carregamento
+    const cred = await signInWithEmailAndPassword(auth, email.value, senha.value);
 
     if (!cred.user.emailVerified) {
       await signOut(auth);
@@ -51,6 +58,8 @@ async function login() {
 
   } catch (e) {
     msg("❌ Email ou senha inválidos.", "red");
+  } finally {
+    esconderLoading(); // sempre esconde loading
   }
 }
 
@@ -62,12 +71,8 @@ async function cadastrar() {
   }
 
   try {
-    const cred = await createUserWithEmailAndPassword(
-      auth,
-      email.value,
-      senha.value
-    );
-
+    mostrarLoading();
+    const cred = await createUserWithEmailAndPassword(auth, email.value, senha.value);
     await sendEmailVerification(cred.user);
 
     await setDoc(doc(db, "usuarios", cred.user.uid), {
@@ -76,11 +81,12 @@ async function cadastrar() {
     });
 
     await signOut(auth);
-
     msg("📧 Cadastro criado! Verifique seu SPAM / GMAIL.", "lime");
 
   } catch (e) {
     msg(e.message, "red");
+  } finally {
+    esconderLoading();
   }
 }
 
