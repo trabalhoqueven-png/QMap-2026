@@ -80,9 +80,11 @@ async function cadastrar() {
     await sendEmailVerification(cred.user);
 
     await setDoc(doc(db, "usuarios", cred.user.uid), {
-      email: cred.user.email,
-      criadoEm: serverTimestamp()
-    });
+    email: cred.user.email,
+    criadoEm: serverTimestamp(),
+    coins: 5,
+    marcacoesGratis: 2
+});
 
     await signOut(auth);
     msg("📧 Cadastro criado! Verifique seu SPAM / GMAIL.", "lime");
