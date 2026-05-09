@@ -1,15 +1,56 @@
 /* =========================
-   QMAP MONITORAMENTO
+   QMAP MONITORAMENTO REALTIME
 ========================= */
 
-/* MAPA */
+import { auth, db } from "./firebase.js";
+
+import {
+
+  collection,
+  addDoc,
+  onSnapshot,
+  deleteDoc,
+  updateDoc,
+  doc
+
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+import {
+
+  onAuthStateChanged,
+  signOut
+
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+/* =========================
+   AUTENTICACAO
+========================= */
+
+let usuarioAtual = null;
+
+onAuthStateChanged(auth, (user)=>{
+
+  if(!user){
+
+    window.location.href = "index.html";
+
+    return;
+  }
+
+  usuarioAtual = user;
+
+});
+
+/* =========================
+   MAPA
+========================= */
 
 const map = L.map('map').setView([-10.184, -48.333], 13);
 
 L.tileLayer(
   'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
   {
-    attribution: '© OpenStreetMap'
+    attribution:'© OpenStreetMap'
   }
 ).addTo(map);
 
@@ -18,105 +59,128 @@ L.tileLayer(
 ========================= */
 
 const listaVeiculos =
-  document.getElementById('listaVeiculos');
+document.getElementById('listaVeiculos');
 
 const onlineCount =
-  document.getElementById('onlineCount');
+document.getElementById('onlineCount');
 
 const veiculosCount =
-  document.getElementById('veiculosCount');
+document.getElementById('veiculosCount');
 
 const modal =
-  document.getElementById('modal');
+document.getElementById('modal');
 
 const btnAbrirModal =
-  document.getElementById('abrirModal');
+document.getElementById('abrirModal');
 
 const btnFechar =
-  document.getElementById('fechar');
+document.getElementById('fechar');
 
 const btnSalvar =
-  document.getElementById('salvar');
+document.getElementById('salvar');
 
 const btnSair =
-  document.getElementById('btnSair');
+document.getElementById('btnSair');
 
 /* =========================
    MODAL
 ========================= */
 
-btnAbrirModal.onclick = () => {
+btnAbrirModal.onclick = ()=>{
 
   modal.style.display = 'flex';
 
 };
 
-btnFechar.onclick = () => {
+btnFechar.onclick = ()=>{
 
   modal.style.display = 'none';
 
 };
 
 /* =========================
-   VEICULOS
+   SAIR
 ========================= */
 
-const veiculos = [
+btnSair.onclick = async ()=>{
 
-  {
-    nome: 'Honda Civic',
-    placa: 'QWE-2026',
-    imei: '864500000001',
-    lat: -10.184,
-    lng: -48.333,
-    velocidade: 60,
-    status: 'online'
-  },
+  const confirmar =
+  confirm('Deseja sair?');
 
-  {
-    nome: 'CG 160 Titan',
-    placa: 'ABC-3030',
-    imei: '864500000002',
-    lat: -10.190,
-    lng: -48.320,
-    velocidade: 0,
-    status: 'offline'
-  }
+  if(!confirmar) return;
 
-];
+  await signOut(auth);
+
+  window.location.href =
+  'index.html';
+
+};
 
 /* =========================
-   MARCADORES
+   ARRAY VEICULOS
 ========================= */
 
+const veiculos = [];
+
 const markers = [];
+
+/* =========================
+   REALTIME FIREBASE
+========================= */
+
+onSnapshot(
+
+  collection(db,"veiculos"),
+
+  (snapshot)=>{
+
+    veiculos.length = 0;
+
+    snapshot.forEach((docSnap)=>{
+
+      veiculos.push({
+
+        id: docSnap.id,
+        ...docSnap.data()
+
+      });
+
+    });
+
+    renderizarVeiculos();
+
+  }
+
+);
 
 /* =========================
    RENDERIZAR
 ========================= */
 
-function renderizarVeiculos() {
+function renderizarVeiculos(){
 
   listaVeiculos.innerHTML = '';
 
-  markers.forEach(marker => {
+  markers.forEach(marker=>{
+
     map.removeLayer(marker);
+
   });
 
   markers.length = 0;
 
   let online = 0;
 
-  veiculos.forEach((v, index) => {
+  veiculos.forEach((v,index)=>{
 
-    if (v.status === 'online') {
+    if(v.status === 'online'){
+
       online++;
+
     }
 
-    /* CARD */
-
     const div =
-      document.createElement('div');
+    document.createElement('div');
 
     div.className = 'veiculo';
 
@@ -141,7 +205,7 @@ function renderizarVeiculos() {
       </div>
 
       <div class="info">
-        ⚡ ${v.velocidade} km/h
+        ⚡ ${v.velocidade || 0} km/h
       </div>
 
       <div class="acoes">
@@ -166,12 +230,10 @@ function renderizarVeiculos() {
 
     `;
 
-    /* CLICAR CARD */
-
-    div.onclick = () => {
+    div.onclick = ()=>{
 
       map.setView(
-        [v.lat, v.lng],
+        [v.lat,v.lng],
         16
       );
 
@@ -179,105 +241,110 @@ function renderizarVeiculos() {
 
     listaVeiculos.appendChild(div);
 
-    /* MARKER */
+    const marker = L.marker(
+      [v.lat,v.lng]
+    )
 
-    const marker =
-      L.marker([v.lat, v.lng])
+    .addTo(map)
 
-      .addTo(map)
+    .bindPopup(`
 
-      .bindPopup(`
+      <strong>${v.nome}</strong><br>
 
-        <strong>${v.nome}</strong><br>
+      🚘 ${v.placa}<br>
 
-        🚘 ${v.placa}<br>
+      📡 ${v.status}<br>
 
-        ⚡ ${v.velocidade} km/h<br>
+      ⚡ ${v.velocidade || 0} km/h
 
-        📡 ${v.status}
-
-      `);
+    `);
 
     markers.push(marker);
 
   });
 
-  onlineCount.innerText = online;
+  onlineCount.innerText =
+  online;
 
   veiculosCount.innerText =
-    veiculos.length;
+  veiculos.length;
 
 }
-
-/* =========================
-   INICIAR
-========================= */
-
-renderizarVeiculos();
 
 /* =========================
    SALVAR VEICULO
 ========================= */
 
-btnSalvar.onclick = () => {
+btnSalvar.onclick = async ()=>{
 
   const nome =
-    document.getElementById('nome').value;
+  document.getElementById('nome').value;
 
   const placa =
-    document.getElementById('placa').value;
+  document.getElementById('placa').value;
 
   const imei =
-    document.getElementById('imei').value;
+  document.getElementById('imei').value;
 
   const status =
-    document.getElementById('status').value;
+  document.getElementById('status').value;
 
-  /* VALIDACAO */
-
-  if (!nome || !placa || !imei) {
+  if(!nome || !placa || !imei){
 
     alert('Preencha todos os campos');
 
     return;
+  }
+
+  try{
+
+    await addDoc(
+
+      collection(db,"veiculos"),
+
+      {
+
+        nome,
+        placa,
+        imei,
+        status,
+
+        velocidade:0,
+
+        lat:
+        -10.184 +
+        (Math.random()/100),
+
+        lng:
+        -48.333 +
+        (Math.random()/100),
+
+        uid: usuarioAtual.uid,
+
+        criadoEm:
+        new Date()
+
+      }
+
+    );
+
+    modal.style.display = 'none';
+
+    document.getElementById('nome').value = '';
+
+    document.getElementById('placa').value = '';
+
+    document.getElementById('imei').value = '';
 
   }
 
-  /* ADICIONAR */
+  catch(e){
 
-  veiculos.push({
+    console.error(e);
 
-    nome,
-    placa,
-    imei,
-    status,
+    alert('Erro ao salvar');
 
-    velocidade:
-      Math.floor(Math.random() * 120),
-
-    lat:
-      -10.184 + (Math.random() / 100),
-
-    lng:
-      -48.333 + (Math.random() / 100)
-
-  });
-
-  /* RENDER */
-
-  renderizarVeiculos();
-
-  /* FECHAR MODAL */
-
-  modal.style.display = 'none';
-
-  /* LIMPAR */
-
-  document.getElementById('nome').value = '';
-
-  document.getElementById('placa').value = '';
-
-  document.getElementById('imei').value = '';
+  }
 
 };
 
@@ -285,18 +352,45 @@ btnSalvar.onclick = () => {
    EDITAR
 ========================= */
 
-window.editarVeiculo = (index) => {
+window.editarVeiculo =
+async (index)=>{
 
   const novoNome = prompt(
-    'Novo nome do veículo:',
+
+    'Novo nome:',
     veiculos[index].nome
+
   );
 
-  if (!novoNome) return;
+  if(!novoNome) return;
 
-  veiculos[index].nome = novoNome;
+  try{
 
-  renderizarVeiculos();
+    await updateDoc(
+
+      doc(
+        db,
+        "veiculos",
+        veiculos[index].id
+      ),
+
+      {
+
+        nome: novoNome
+
+      }
+
+    );
+
+  }
+
+  catch(e){
+
+    console.error(e);
+
+    alert('Erro ao editar');
+
+  }
 
 };
 
@@ -304,62 +398,84 @@ window.editarVeiculo = (index) => {
    EXCLUIR
 ========================= */
 
-window.excluirVeiculo = (index) => {
+window.excluirVeiculo =
+async (index)=>{
 
   const confirmar =
-    confirm(
-      'Deseja excluir este veículo?'
+  confirm(
+    'Deseja excluir?'
+  );
+
+  if(!confirmar) return;
+
+  try{
+
+    await deleteDoc(
+
+      doc(
+        db,
+        "veiculos",
+        veiculos[index].id
+      )
+
     );
 
-  if (!confirmar) return;
+  }
 
-  veiculos.splice(index, 1);
+  catch(e){
 
-  renderizarVeiculos();
+    console.error(e);
+
+    alert('Erro ao excluir');
+
+  }
 
 };
 
 /* =========================
-   BOTAO SAIR
+   SIMULADOR TEMPO REAL
 ========================= */
 
-btnSair.onclick = () => {
+setInterval(async ()=>{
 
-  const confirmar =
-    confirm(
-      'Deseja sair do sistema?'
-    );
+  veiculos.forEach(async (v)=>{
 
-  if (!confirmar) return;
+    if(v.status === 'online'){
 
-  window.location.href =
-    'index.html';
+      const novaLat =
+      v.lat +
+      ((Math.random()-0.5)/1000);
 
-};
+      const novaLng =
+      v.lng +
+      ((Math.random()-0.5)/1000);
 
-/* =========================
-   TEMPO REAL
-========================= */
+      const novaVelocidade =
+      Math.floor(
+        Math.random()*120
+      );
 
-setInterval(() => {
+      await updateDoc(
 
-  veiculos.forEach(v => {
+        doc(
+          db,
+          "veiculos",
+          v.id
+        ),
 
-    if (v.status === 'online') {
+        {
 
-      v.lat +=
-        (Math.random() - 0.5) / 1000;
+          lat: novaLat,
+          lng: novaLng,
+          velocidade:
+          novaVelocidade
 
-      v.lng +=
-        (Math.random() - 0.5) / 1000;
+        }
 
-      v.velocidade =
-        Math.floor(Math.random() * 120);
+      );
 
     }
 
   });
 
-  renderizarVeiculos();
-
-}, 5000);
+},5000);
