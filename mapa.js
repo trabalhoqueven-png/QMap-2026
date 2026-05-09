@@ -1,296 +1,365 @@
-import { auth, db } from "./firebase.js";
+/* =========================
+   QMAP MONITORAMENTO
+========================= */
 
-import { 
-  collection, 
-  addDoc, 
-  onSnapshot, 
-  doc,
-  getDoc,
-  deleteDoc, 
-  updateDoc 
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+/* MAPA */
 
-import { 
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+const map = L.map('map').setView([-10.184, -48.333], 13);
 
-let usuarioAtual = null;
-let coins = 0;
-let marcacoesGratis = 0;
+L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {
+    attribution: '© OpenStreetMap'
+  }
+).addTo(map);
 
-/* 🔐 PROTEÇÃO DE PÁGINA */
-onAuthStateChanged(auth, async (user) => {
+/* =========================
+   ELEMENTOS
+========================= */
 
-  if (!user) {
-    window.location.replace("index.html");
-    return;
+const listaVeiculos =
+  document.getElementById('listaVeiculos');
+
+const onlineCount =
+  document.getElementById('onlineCount');
+
+const veiculosCount =
+  document.getElementById('veiculosCount');
+
+const modal =
+  document.getElementById('modal');
+
+const btnAbrirModal =
+  document.getElementById('abrirModal');
+
+const btnFechar =
+  document.getElementById('fechar');
+
+const btnSalvar =
+  document.getElementById('salvar');
+
+const btnSair =
+  document.getElementById('btnSair');
+
+/* =========================
+   MODAL
+========================= */
+
+btnAbrirModal.onclick = () => {
+
+  modal.style.display = 'flex';
+
+};
+
+btnFechar.onclick = () => {
+
+  modal.style.display = 'none';
+
+};
+
+/* =========================
+   VEICULOS
+========================= */
+
+const veiculos = [
+
+  {
+    nome: 'Honda Civic',
+    placa: 'QWE-2026',
+    imei: '864500000001',
+    lat: -10.184,
+    lng: -48.333,
+    velocidade: 60,
+    status: 'online'
+  },
+
+  {
+    nome: 'CG 160 Titan',
+    placa: 'ABC-3030',
+    imei: '864500000002',
+    lat: -10.190,
+    lng: -48.320,
+    velocidade: 0,
+    status: 'offline'
   }
 
-  usuarioAtual = user;
+];
 
-  const ref = doc(db,"usuarios",user.uid);
-  const snap = await getDoc(ref);
+/* =========================
+   MARCADORES
+========================= */
 
-  if(snap.exists()){
+const markers = [];
 
-    coins = snap.data().coins || 0;
-    marcacoesGratis = snap.data().marcacoesGratis || 0;
+/* =========================
+   RENDERIZAR
+========================= */
 
-    atualizarPainel();
+function renderizarVeiculos() {
 
-  }
+  listaVeiculos.innerHTML = '';
 
-});
-
-/* 🪙 PAINEL COINS */
-function atualizarPainel(){
-
-  const elCoins = document.getElementById("coins");
-  const elGratis = document.getElementById("gratis");
-
-  if(elCoins) elCoins.innerText = coins;
-  if(elGratis) elGratis.innerText = marcacoesGratis;
-
-}
-
-/* 🚪 BOTÃO SAIR */
-const btnSair = document.getElementById("btnSair");
-
-if (btnSair) {
-  btnSair.addEventListener("click", async () => {
-    await signOut(auth);
-    window.location.replace("index.html");
+  markers.forEach(marker => {
+    map.removeLayer(marker);
   });
-}
 
-/* 🗺 MAPA */
-let map = L.map("map").setView([-17.8, -50.9], 13);
-let marcadorTemporario = null;
-let localSelecionado = null;
-let markers = {};
+  markers.length = 0;
 
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "© OpenStreetMap"
-}).addTo(map);
+  let online = 0;
 
-const modal = document.getElementById("modal");
-const btnAdd = document.getElementById("btnAdd");
-const btnFechar = document.getElementById("fechar");
-const btnSalvar = document.getElementById("salvar");
+  veiculos.forEach((v, index) => {
 
-const inputPreco = document.getElementById("preco");
-const inputTelefone = document.getElementById("telefone");
-
-/* 📞 TELEFONE */
-inputTelefone.addEventListener("input", () => {
-
-  let numeros = inputTelefone.value.replace(/\D/g, "");
-  numeros = numeros.substring(0, 11);
-
-  if (numeros.length > 6) {
-    inputTelefone.value =
-      numeros.replace(/(\d{2})(\d{5})(\d+)/, "($1) $2-$3");
-  } 
-  else if (numeros.length > 2) {
-    inputTelefone.value =
-      numeros.replace(/(\d{2})(\d+)/, "($1) $2");
-  } 
-  else {
-    inputTelefone.value = numeros;
-  }
-
-});
-
-/* 💰 PREÇO */
-inputPreco.addEventListener("input", () => {
-
-  let numeros = inputPreco.value.replace(/\D/g, "");
-  numeros = numeros.substring(0, 9);
-
-  if (!numeros) {
-    inputPreco.value = "";
-    return;
-  }
-
-  let valor = (numeros / 100).toFixed(2);
-  valor = valor.replace(".", ",");
-  valor = valor.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-
-  inputPreco.value = valor;
-
-});
-
-/* 📍 ABRIR MODAL */
-btnAdd.onclick = () => modal.classList.remove("hidden");
-btnFechar.onclick = () => modal.classList.add("hidden");
-
-/* 📍 CLICAR NO MAPA */
-map.on("click", (e) => {
-
-  localSelecionado = e.latlng;
-
-  if (marcadorTemporario) {
-    map.removeLayer(marcadorTemporario);
-  }
-
-  marcadorTemporario = L.marker(e.latlng).addTo(map);
-
-});
-
-/* 💾 SALVAR ANÚNCIO + SISTEMA DE COINS */
-btnSalvar.addEventListener("click", async () => {
-
-  if (!localSelecionado) {
-    alert("Clique no mapa primeiro!");
-    return;
-  }
-
-  if (!usuarioAtual) {
-    alert("Usuário não autenticado.");
-    return;
-  }
-
-  /* 🔒 SISTEMA DE LIMITE */
-
-  if(marcacoesGratis > 0){
-
-    marcacoesGratis--;
-
-  } else {
-
-    if(coins <= 0){
-      alert("Você não tem coins!");
-      return;
+    if (v.status === 'online') {
+      online++;
     }
 
-    coins--;
+    /* CARD */
 
-  }
+    const div =
+      document.createElement('div');
 
-  const tipo = document.getElementById("tipo").value;
-  const titulo = document.getElementById("titulo").value;
-  const descricao = document.getElementById("descricao").value;
+    div.className = 'veiculo';
 
-  const precoLimpo = inputPreco.value.replace(/\D/g, "");
-  const telefoneLimpo = inputTelefone.value.replace(/\D/g, "");
+    div.innerHTML = `
 
-  try {
+      <div class="veiculo-top">
 
-    await addDoc(collection(db, "anuncios"), {
-      tipo,
-      titulo,
-      descricao,
-      preco: precoLimpo ? Number(precoLimpo) / 100 : null,
-      telefone: telefoneLimpo,
-      lat: localSelecionado.lat,
-      lng: localSelecionado.lng,
-      uid: usuarioAtual.uid,
-      criadoEm: new Date()
-    });
+        <strong>${v.nome}</strong>
 
-    /* atualizar coins */
+        <span class="status ${v.status}">
+          ${v.status}
+        </span>
 
-    await updateDoc(doc(db,"usuarios",usuarioAtual.uid),{
-      coins: coins,
-      marcacoesGratis: marcacoesGratis
-    });
+      </div>
 
-    atualizarPainel();
+      <div class="info">
+        🚘 ${v.placa}
+      </div>
 
-    alert("Anúncio criado!");
+      <div class="info">
+        📡 IMEI: ${v.imei}
+      </div>
 
-    modal.classList.add("hidden");
+      <div class="info">
+        ⚡ ${v.velocidade} km/h
+      </div>
 
-    document.getElementById("titulo").value = "";
-    document.getElementById("descricao").value = "";
-    inputPreco.value = "";
-    inputTelefone.value = "";
+      <div class="acoes">
 
-    localSelecionado = null;
+        <button
+          class="btn-editar"
+          onclick="editarVeiculo(${index})">
 
-  } catch (e) {
-    console.error("ERRO:", e);
-  }
+          ✏️ Editar
 
-});
+        </button>
 
-/* 📡 CARREGAR ANÚNCIOS */
-function carregarAnuncios() {
+        <button
+          class="btn-excluir"
+          onclick="excluirVeiculo(${index})">
 
-  const ref = collection(db, "anuncios");
+          🗑 Excluir
 
-  onSnapshot(ref, (snapshot) => {
+        </button>
 
-    Object.values(markers).forEach(marker => map.removeLayer(marker));
-    markers = {};
+      </div>
 
-    snapshot.forEach((docSnap) => {
+    `;
 
-      const d = docSnap.data();
-      const id = docSnap.id;
+    /* CLICAR CARD */
 
-      let precoFormatado = "-";
+    div.onclick = () => {
 
-      if (d.preco) {
-        precoFormatado = d.preco.toLocaleString("pt-BR", {
-          style: "currency",
-          currency: "BRL"
-        });
-      }
+      map.setView(
+        [v.lat, v.lng],
+        16
+      );
 
-      let telefoneFormatado = "-";
+    };
 
-      if (d.telefone && d.telefone.length === 11) {
-        telefoneFormatado =
-          `(${d.telefone.slice(0,2)}) ${d.telefone.slice(2,7)}-${d.telefone.slice(7)}`;
-      }
+    listaVeiculos.appendChild(div);
 
-      markers[id] = L.marker([d.lat, d.lng])
-        .addTo(map)
-        .bindPopup(() => {
+    /* MARKER */
 
-          let botoes = "";
+    const marker =
+      L.marker([v.lat, v.lng])
 
-          if (usuarioAtual && usuarioAtual.uid === d.uid) {
-            botoes = `
-              <br><br>
-              <button onclick="editar('${id}')">✏️ Editar</button>
-              <button onclick="excluir('${id}')">🗑 Excluir</button>
-            `;
-          }
+      .addTo(map)
 
-          return `
-            <strong>${d.titulo}</strong><br>
-            ${d.descricao}<br>
-            💰 ${precoFormatado}<br>
-            📞 ${telefoneFormatado}
-            ${botoes}
-          `;
-        });
+      .bindPopup(`
 
-    });
+        <strong>${v.nome}</strong><br>
+
+        🚘 ${v.placa}<br>
+
+        ⚡ ${v.velocidade} km/h<br>
+
+        📡 ${v.status}
+
+      `);
+
+    markers.push(marker);
 
   });
+
+  onlineCount.innerText = online;
+
+  veiculosCount.innerText =
+    veiculos.length;
 
 }
 
-carregarAnuncios();
+/* =========================
+   INICIAR
+========================= */
 
-/* 🗑 EXCLUIR */
-window.excluir = async (id) => {
-  if (!confirm("Deseja excluir este anúncio?")) return;
-  await deleteDoc(doc(db, "anuncios", id));
-};
+renderizarVeiculos();
 
-/* ✏️ EDITAR */
-window.editar = async (id) => {
+/* =========================
+   SALVAR VEICULO
+========================= */
 
-  const novoTitulo = prompt("Novo título:");
-  if (!novoTitulo) return;
+btnSalvar.onclick = () => {
 
-  await updateDoc(doc(db, "anuncios", id), {
-    titulo: novoTitulo
+  const nome =
+    document.getElementById('nome').value;
+
+  const placa =
+    document.getElementById('placa').value;
+
+  const imei =
+    document.getElementById('imei').value;
+
+  const status =
+    document.getElementById('status').value;
+
+  /* VALIDACAO */
+
+  if (!nome || !placa || !imei) {
+
+    alert('Preencha todos os campos');
+
+    return;
+
+  }
+
+  /* ADICIONAR */
+
+  veiculos.push({
+
+    nome,
+    placa,
+    imei,
+    status,
+
+    velocidade:
+      Math.floor(Math.random() * 120),
+
+    lat:
+      -10.184 + (Math.random() / 100),
+
+    lng:
+      -48.333 + (Math.random() / 100)
+
   });
 
+  /* RENDER */
+
+  renderizarVeiculos();
+
+  /* FECHAR MODAL */
+
+  modal.style.display = 'none';
+
+  /* LIMPAR */
+
+  document.getElementById('nome').value = '';
+
+  document.getElementById('placa').value = '';
+
+  document.getElementById('imei').value = '';
+
 };
+
+/* =========================
+   EDITAR
+========================= */
+
+window.editarVeiculo = (index) => {
+
+  const novoNome = prompt(
+    'Novo nome do veículo:',
+    veiculos[index].nome
+  );
+
+  if (!novoNome) return;
+
+  veiculos[index].nome = novoNome;
+
+  renderizarVeiculos();
+
+};
+
+/* =========================
+   EXCLUIR
+========================= */
+
+window.excluirVeiculo = (index) => {
+
+  const confirmar =
+    confirm(
+      'Deseja excluir este veículo?'
+    );
+
+  if (!confirmar) return;
+
+  veiculos.splice(index, 1);
+
+  renderizarVeiculos();
+
+};
+
+/* =========================
+   BOTAO SAIR
+========================= */
+
+btnSair.onclick = () => {
+
+  const confirmar =
+    confirm(
+      'Deseja sair do sistema?'
+    );
+
+  if (!confirmar) return;
+
+  window.location.href =
+    'index.html';
+
+};
+
+/* =========================
+   TEMPO REAL
+========================= */
+
+setInterval(() => {
+
+  veiculos.forEach(v => {
+
+    if (v.status === 'online') {
+
+      v.lat +=
+        (Math.random() - 0.5) / 1000;
+
+      v.lng +=
+        (Math.random() - 0.5) / 1000;
+
+      v.velocidade =
+        Math.floor(Math.random() * 120);
+
+    }
+
+  });
+
+  renderizarVeiculos();
+
+}, 5000);
