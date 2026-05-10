@@ -1,7 +1,9 @@
-import { auth, db } from "./firebase.js";
+import { auth, db }
+from "./firebase.js";
 
 import {
   collection,
+  addDoc,
   onSnapshot,
   deleteDoc,
   doc,
@@ -10,19 +12,9 @@ import {
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 import {
-  onAuthStateChanged,
-  signOut
+  onAuthStateChanged
 }
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-const totalVeiculos =
-document.getElementById("totalVeiculos");
-
-const online =
-document.getElementById("online");
-
-const usuarios =
-document.getElementById("usuarios");
 
 const lista =
 document.getElementById("lista");
@@ -30,18 +22,23 @@ document.getElementById("lista");
 const btnSair =
 document.getElementById("btnSair");
 
-let usuarioAtual = null;
+const salvar =
+document.getElementById("salvar");
 
-onAuthStateChanged(auth, async(user)=>{
+/* =========================
+   LOGIN ADMIN
+========================= */
+
+onAuthStateChanged(auth,
+async(user)=>{
 
   if(!user){
 
-    location.href = "index.html";
+    location.href =
+    "index.html";
 
     return;
   }
-
-  usuarioAtual = user;
 
   const userRef =
   doc(db,"usuarios",user.uid);
@@ -51,9 +48,8 @@ onAuthStateChanged(auth, async(user)=>{
 
   if(!userSnap.exists()){
 
-    alert("Usuário não encontrado");
-
-    location.href = "mapa.html";
+    location.href =
+    "mapa.html";
 
     return;
   }
@@ -63,22 +59,120 @@ onAuthStateChanged(auth, async(user)=>{
 
   if(!dados.admin){
 
-    alert("Sem permissão ADMIN");
-
-    location.href = "mapa.html";
+    location.href =
+    "mapa.html";
 
     return;
   }
 
-  console.log("ADMIN LOGADO");
-
 });
+
 /* =========================
-   BOTAO SAIR
+   VOLTAR
 ========================= */
 
 btnSair.onclick = ()=>{
 
-  location.href = "mapa.html";
+  location.href =
+  "mapa.html";
+
+};
+
+/* =========================
+   SALVAR
+========================= */
+
+salvar.onclick = async()=>{
+
+  const nome =
+  document.getElementById("nome").value;
+
+  const placa =
+  document.getElementById("placa").value;
+
+  const imei =
+  document.getElementById("imei").value;
+
+  const status =
+  document.getElementById("status").value;
+
+  if(!nome || !placa || !imei){
+
+    alert("Preencha tudo");
+
+    return;
+  }
+
+  await addDoc(
+
+    collection(db,"veiculos"),
+
+    {
+      nome,
+      placa,
+      imei,
+      status,
+      velocidade:0,
+      lat:-10.184 + (Math.random()/100),
+      lng:-48.333 + (Math.random()/100)
+    }
+
+  );
+
+  alert("Veículo salvo");
+
+};
+
+/* =========================
+   LISTA
+========================= */
+
+onSnapshot(
+
+  collection(db,"veiculos"),
+
+  (snapshot)=>{
+
+    lista.innerHTML = "";
+
+    snapshot.forEach((docSnap)=>{
+
+      const v =
+      docSnap.data();
+
+      const div =
+      document.createElement("div");
+
+      div.innerHTML = `
+
+        <h3>${v.nome}</h3>
+
+        <p>${v.placa}</p>
+
+        <button
+        onclick="excluir('${docSnap.id}')">
+
+          Excluir
+
+        </button>
+
+      `;
+
+      lista.appendChild(div);
+
+    });
+
+  }
+
+);
+
+window.excluir =
+async(id)=>{
+
+  await deleteDoc(
+
+    doc(db,"veiculos",id)
+
+  );
 
 };

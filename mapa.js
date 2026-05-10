@@ -44,17 +44,6 @@ document.getElementById("btnAdmin");
 const btnSair =
 document.getElementById("btnSair");
 
-const modal =
-document.getElementById("modal");
-
-const abrirModal =
-document.getElementById("abrirModal");
-
-const fechar =
-document.getElementById("fechar");
-
-const salvar =
-document.getElementById("salvar");
 
 const veiculos = [];
 
@@ -64,13 +53,6 @@ if(btnAdmin){
   btnAdmin.style.display = "none";
 }
 
-abrirModal.onclick = ()=>{
-  modal.style.display = "flex";
-};
-
-fechar.onclick = ()=>{
-  modal.style.display = "none";
-};
 
 btnSair.onclick = async()=>{
 
@@ -217,47 +199,6 @@ function renderizar(){
 
 }
 
-salvar.onclick = async()=>{
-
-  const nome =
-  document.getElementById("nome").value;
-
-  const placa =
-  document.getElementById("placa").value;
-
-  const imei =
-  document.getElementById("imei").value;
-
-  const status =
-  document.getElementById("status").value;
-
-  if(!nome || !placa || !imei){
-
-    alert("Preencha tudo");
-
-    return;
-  }
-
-  await addDoc(
-
-    collection(db,"veiculos"),
-
-    {
-      nome,
-      placa,
-      imei,
-      status,
-      velocidade:0,
-      lat:-10.184 + (Math.random()/100),
-      lng:-48.333 + (Math.random()/100)
-    }
-
-  );
-
-  modal.style.display =
-  "none";
-
-};
 
 window.excluirVeiculo =
 async(id)=>{
