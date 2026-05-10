@@ -3,9 +3,10 @@
 <head>
 
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport"
+  content="width=device-width, initial-scale=1.0">
 
-  <title>QMap Monitoramento</title>
+  <title>QMap Monitor</title>
 
   <link rel="stylesheet"
   href="https://unpkg.com/leaflet/dist/leaflet.css">
@@ -19,78 +20,128 @@
 </head>
 <body>
 
-  <div class="sidebar">
+  <!-- TOPO -->
 
-    <div class="logo">
-      QMap Monitor
-    </div>
+  <div class="topbar">
 
-    <div class="veiculos"
-id="listaVeiculos"></div>
+    <h2>QMap</h2>
 
-<div class="bottom-menu">
-
-  <button>
-    <i class="fa-solid fa-map"></i>
-    <span>Mapa</span>
-  </button>
-
-  <button>
-    <i class="fa-solid fa-car"></i>
-    <span>Veículos</span>
-  </button>
-
-  <button id="btnSair">
-    <i class="fa-solid fa-right-from-bracket"></i>
-    <span>Sair</span>
-  </button>
-
-</div>
-
-    </div>
-
-    <div id="map"></div>
+    <button
+    id="btnAdmin"
+    class="btn-admin">
+      ADMIN
+    </button>
 
   </div>
+
+  <!-- MAPA -->
+
+  <div id="map"></div>
+
+  <!-- CARDS -->
+
+  <div class="cards">
+
+    <div class="card">
+      <h3>Online</h3>
+      <p id="onlineCount">0</p>
+    </div>
+
+    <div class="card">
+      <h3>Veículos</h3>
+      <p id="veiculosCount">0</p>
+    </div>
+
+  </div>
+
+  <!-- LISTA -->
+
+  <div
+  class="veiculos"
+  id="listaVeiculos"></div>
+
+  <!-- MENU -->
+
+  <div class="bottom-menu">
+
+    <button>
+      <i class="fa-solid fa-map"></i>
+      <span>Mapa</span>
+    </button>
+
+    <button>
+      <i class="fa-solid fa-car"></i>
+      <span>Veículos</span>
+    </button>
+
+    <button id="btnSair">
+      <i class="fa-solid fa-right-from-bracket"></i>
+      <span>Sair</span>
+    </button>
+
+  </div>
+
+  <!-- BOTAO -->
 
   <button
   class="btn-float"
   id="abrirModal">
-    +
+
+    <i class="fa-solid fa-plus"></i>
+
   </button>
 
-  <div class="modal"
+  <!-- MODAL -->
+
+  <div
+  class="modal"
   id="modal">
 
     <div class="modal-content">
 
       <h3>Novo Veículo</h3>
 
-      <input type="text"
+      <input
+      type="text"
       id="nome"
       placeholder="Nome">
 
-      <input type="text"
+      <input
+      type="text"
       id="placa"
       placeholder="Placa">
 
-      <input type="text"
+      <input
+      type="text"
       id="imei"
       placeholder="IMEI">
 
       <select id="status">
-        <option value="online">Online</option>
-        <option value="offline">Offline</option>
+
+        <option value="online">
+          Online
+        </option>
+
+        <option value="offline">
+          Offline
+        </option>
+
       </select>
 
-      <button id="salvar"
+      <button
+      id="salvar"
       class="salvar">
+
         Salvar
+
       </button>
 
-      <button id="fechar"
+      <button
+      id="fechar"
       class="cancelar">
+
         Cancelar
+
       </button>
 
     </div>
@@ -100,7 +151,8 @@ id="listaVeiculos"></div>
   <script
   src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-  <script type="module"
+  <script
+  type="module"
   src="mapa.js"></script>
 
 </body>

@@ -60,7 +60,9 @@ const veiculos = [];
 
 const markers = [];
 
-btnAdmin.style.display = "none";
+if(btnAdmin){
+  btnAdmin.style.display = "none";
+}
 
 abrirModal.onclick = ()=>{
   modal.style.display = "flex";
@@ -112,12 +114,16 @@ async(user)=>{
 
 });
 
-btnAdmin.onclick = ()=>{
+if(btnAdmin){
 
-  location.href =
-  "admin.html";
+  btnAdmin.onclick = ()=>{
 
-};
+    location.href =
+    "admin.html";
+
+  };
+
+}
 
 onSnapshot(
 
