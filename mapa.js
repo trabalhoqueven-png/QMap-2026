@@ -8,6 +8,8 @@ import {
   onSnapshot,
   doc,
   getDoc,
+  query,
+  where,
   deleteDoc
 }
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -44,10 +46,31 @@ document.getElementById("btnAdmin");
 const btnSair =
 document.getElementById("btnSair");
 
+const btnVeiculos =
+document.getElementById("btnVeiculos");
 
 const veiculos = [];
 
 const markers = [];
+
+let painelVeiculosAberto = false;
+
+btnVeiculos.onclick = () => {
+
+  painelVeiculosAberto = !painelVeiculosAberto;
+
+  if(painelVeiculosAberto){
+    listaVeiculos.classList.add("ativo");
+  } else {
+    listaVeiculos.classList.remove("ativo");
+  }
+
+};
+
+map.on("click", () => {
+  listaVeiculos.classList.remove("ativo");
+  painelVeiculosAberto = false;
+});
 
 if(btnAdmin){
   btnAdmin.style.display = "none";
@@ -63,15 +86,25 @@ btnSair.onclick = async()=>{
 
 };
 
-onAuthStateChanged(auth,
-async(user)=>{
+
+if(btnAdmin){
+
+  btnAdmin.onclick = ()=>{
+
+    location.href =
+    "admin.html";
+
+  };
+
+}
+
+onAuthStateChanged(auth, async(user)=>{
 
   if(!user){
 
-    location.href =
-    "index.html";
-
+    location.href = "index.html";
     return;
+
   }
 
   const userRef =
@@ -94,43 +127,39 @@ async(user)=>{
 
   }
 
-});
+  /* =========================
+     LISTAR VEICULOS DO USUARIO
+  ========================= */
 
-if(btnAdmin){
+  onSnapshot(
 
-  btnAdmin.onclick = ()=>{
+    query(
+      collection(db,"veiculos"),
+      where("uid","==",user.uid)
+    ),
 
-    location.href =
-    "admin.html";
+    (snapshot)=>{
 
-  };
+      veiculos.length = 0;
 
-}
+      snapshot.forEach((docSnap)=>{
 
-onSnapshot(
+        veiculos.push({
 
-  collection(db,"veiculos"),
+          id:docSnap.id,
+          ...docSnap.data()
 
-  (snapshot)=>{
-
-    veiculos.length = 0;
-
-    snapshot.forEach((docSnap)=>{
-
-      veiculos.push({
-
-        id:docSnap.id,
-        ...docSnap.data()
+        });
 
       });
 
-    });
+      renderizar();
 
-    renderizar();
+    }
 
-  }
+  );
 
-);
+});
 
 function renderizar(){
 

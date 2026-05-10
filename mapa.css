@@ -204,16 +204,23 @@ body{
 }
 
 /* VEICULOS */
-
 .veiculos{
-  position:absolute;
-  top:160px;
-  left:50%;
-  transform:translateX(-50%);
-  width:92%;
-  max-height:250px;
-  overflow:auto;
-  z-index:999;
+  position:fixed;
+  top:70px;
+  right:-360px;
+  width:340px;
+  height:calc(100% - 145px);
+  background:white;
+  overflow-y:auto;
+  z-index:1500;
+  transition:0.3s;
+  box-shadow:-3px 0 12px rgba(0,0,0,.2);
+  padding:10px;
+}
+
+/* quando abrir */
+.veiculos.ativo{
+  right:0;
 }
 
 .veiculo{

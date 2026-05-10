@@ -108,6 +108,7 @@ salvar.onclick = async()=>{
     collection(db,"veiculos"),
 
     {
+      uid: document.getElementById("uid").value,
       nome,
       placa,
       imei,
