@@ -2,255 +2,244 @@
   margin:0;
   padding:0;
   box-sizing:border-box;
-  font-family:Arial;
+  font-family:Arial, sans-serif;
 }
 
 html,
 body{
+  width:100%;
   height:100%;
+  overflow:hidden;
+  background:#f4f4f4;
 }
+
+/* APP */
 
 body{
   display:flex;
-  background:#0f172a;
-  color:white;
-}
-
-.sidebar{
-  width:320px;
-  background:#111827;
-  display:flex;
   flex-direction:column;
 }
 
-.logo{
-  padding:20px;
-  font-size:24px;
-  color:#22c55e;
-}
-
-.veiculos{
-  flex:1;
-  overflow:auto;
-  padding:15px;
-}
-
-.veiculo{
-  background:#1e293b;
-  padding:15px;
-  border-radius:12px;
-  margin-bottom:12px;
-}
-
-.content{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-}
+/* TOPO */
 
 .topbar{
   height:70px;
-  background:#111827;
+  background:#10bdbd;
   display:flex;
+  align-items:center;
   justify-content:space-between;
-  align-items:center;
-  padding:0 20px;
-}
-.top-info{
-  display:flex;
-  gap:10px;
-  align-items:center;
+  padding:0 15px;
+  color:white;
+  z-index:1000;
 }
 
-.card{
-  background:#1e293b;
-  padding:10px 15px;
-  border-radius:10px;
+.topbar h2{
+  font-size:22px;
+  font-weight:bold;
 }
+
+/* MAPA */
 
 #map{
   flex:1;
+  width:100%;
+  z-index:1;
 }
 
-.btn-sair,
-.btn-admin{
+/* PAINEL */
+
+.painel{
+  position:absolute;
+  top:85px;
+  left:50%;
+  transform:translateX(-50%);
+  width:92%;
+  z-index:999;
+}
+
+.search{
+  width:100%;
+  height:55px;
   border:none;
-  padding:10px 15px;
-  border-radius:10px;
+  border-radius:18px;
+  padding:0 20px;
+  font-size:16px;
+  background:white;
+  box-shadow:0 3px 10px rgba(0,0,0,.15);
+}
+
+/* CARDS */
+
+.cards{
+  position:absolute;
+  bottom:90px;
+  left:50%;
+  transform:translateX(-50%);
+  width:92%;
+  display:flex;
+  gap:10px;
+  z-index:999;
+}
+
+.card{
+  flex:1;
+  background:white;
+  border-radius:18px;
+  padding:15px;
+  box-shadow:0 3px 10px rgba(0,0,0,.15);
+  text-align:center;
+}
+
+.card h3{
+  font-size:14px;
+  color:#666;
+}
+
+.card p{
+  margin-top:5px;
+  font-size:20px;
+  font-weight:bold;
+  color:#111;
+}
+
+/* MENU INFERIOR */
+
+.bottom-menu{
+  height:75px;
+  background:#10bdbd;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  z-index:1000;
+}
+
+.bottom-menu button{
+  background:none;
+  border:none;
   color:white;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  font-size:12px;
   cursor:pointer;
 }
 
-.btn-sair{
-  background:#dc2626;
+.bottom-menu i{
+  font-size:24px;
+  margin-bottom:4px;
 }
 
-.btn-admin{
-  background:#2563eb;
-}
+/* FLOAT */
 
 .btn-float{
   position:fixed;
-  right:25px;
-  bottom:25px;
+  right:20px;
+  bottom:95px;
   width:60px;
   height:60px;
   border:none;
   border-radius:50%;
-  background:#22c55e;
+  background:#2196f3;
   color:white;
-  font-size:22px;
-  cursor:pointer;
+  font-size:26px;
+  box-shadow:0 3px 10px rgba(0,0,0,.25);
+  z-index:1000;
 }
+
+/* MODAL */
 
 .modal{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.7);
+  background:rgba(0,0,0,.6);
   display:none;
   justify-content:center;
   align-items:center;
+  z-index:2000;
 }
 
 .modal-content{
-  width:400px;
-  background:#111827;
-  padding:25px;
-  border-radius:15px;
+  width:90%;
+  background:white;
+  border-radius:20px;
+  padding:20px;
   display:flex;
   flex-direction:column;
   gap:12px;
 }
 
+.modal-content h3{
+  color:#111;
+}
+
 .modal-content input,
 .modal-content select{
-  padding:12px;
+  height:50px;
   border:none;
-  border-radius:10px;
-  background:#1e293b;
-  color:white;
+  border-radius:12px;
+  background:#f1f5f9;
+  padding:0 15px;
+  font-size:15px;
 }
 
 .salvar,
 .cancelar{
+  height:50px;
   border:none;
-  padding:12px;
-  border-radius:10px;
+  border-radius:12px;
   color:white;
-  cursor:pointer;
+  font-size:15px;
 }
 
 .salvar{
-  background:#22c55e;
+  background:#10b981;
 }
 
 .cancelar{
-  background:#334155;
-}
-/* =========================
-   RESPONSIVO CELULAR
-========================= */
-
-@media (max-width:900px){
-
-  body{
-    flex-direction:column;
-    overflow:hidden;
-  }
-
-  .sidebar{
-    width:100%;
-    height:45vh;
-    border-right:none;
-    border-bottom:1px solid #1f2937;
-  }
-
-  .logo{
-    text-align:center;
-    font-size:20px;
-  }
-
-  .veiculos{
-    padding:10px;
-  }
-
-  .veiculo{
-    padding:12px;
-  }
-
-  .content{
-    width:100%;
-    height:55vh;
-  }
-
-  .topbar{
-    height:auto;
-    flex-direction:column;
-    gap:10px;
-    padding:15px;
-  }
-
-  .topbar h2{
-    font-size:18px;
-  }
-
-  .top-info{
-    width:100%;
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-  }
-
-  .card{
-    text-align:center;
-    font-size:13px;
-  }
-
-  .btn-sair,
-  .btn-admin{
-    width:100%;
-  }
-
-  #map{
-    width:100%;
-    height:100%;
-  }
-
-  .btn-float{
-    width:55px;
-    height:55px;
-    bottom:15px;
-    right:15px;
-    font-size:20px;
-  }
-
-  .modal-content{
-    width:92%;
-    padding:20px;
-  }
-
+  background:#ef4444;
 }
 
-@media (max-width:500px){
+/* VEICULOS */
 
-  .top-info{
-    grid-template-columns:1fr;
-  }
+.veiculos{
+  position:absolute;
+  top:160px;
+  left:50%;
+  transform:translateX(-50%);
+  width:92%;
+  max-height:250px;
+  overflow:auto;
+  z-index:999;
+}
 
-  .sidebar{
-    height:50vh;
-  }
+.veiculo{
+  background:white;
+  border-radius:16px;
+  padding:15px;
+  margin-bottom:10px;
+  box-shadow:0 3px 10px rgba(0,0,0,.1);
+}
 
-  .content{
-    height:50vh;
-  }
+.veiculo h3{
+  color:#111;
+  margin-bottom:5px;
+}
 
-  .veiculo h3{
-    font-size:15px;
-  }
+.veiculo p{
+  color:#666;
+  margin-bottom:4px;
+}
 
-  .veiculo p{
-    font-size:13px;
-  }
-
+.veiculo button{
+  margin-top:10px;
+  width:100%;
+  height:40px;
+  border:none;
+  border-radius:10px;
+  background:#ef4444;
+  color:white;
 }
