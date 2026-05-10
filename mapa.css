@@ -56,7 +56,6 @@ body{
   align-items:center;
   padding:0 20px;
 }
-
 .top-info{
   display:flex;
   gap:10px;
@@ -72,16 +71,22 @@ body{
 #map{
   flex:1;
 }
+
+.btn-sair,
 .btn-admin{
   border:none;
   padding:10px 15px;
   border-radius:10px;
   color:white;
   cursor:pointer;
-  background:#2563eb;
 }
+
 .btn-sair{
   background:#dc2626;
+}
+
+.btn-admin{
+  background:#2563eb;
 }
 
 .btn-float{
@@ -97,6 +102,7 @@ body{
   font-size:22px;
   cursor:pointer;
 }
+
 .modal{
   position:fixed;
   inset:0;
@@ -145,7 +151,7 @@ body{
    RESPONSIVO CELULAR
 ========================= */
 
-@media (max-width: 900px){
+@media (max-width:900px){
 
   body{
     flex-direction:column;
@@ -154,7 +160,7 @@ body{
 
   .sidebar{
     width:100%;
-    height:260px;
+    height:45vh;
     border-right:none;
     border-bottom:1px solid #1f2937;
   }
@@ -162,20 +168,6 @@ body{
   .logo{
     text-align:center;
     font-size:20px;
-  }
-
-  .menu{
-    flex-direction:row;
-    overflow-x:auto;
-    gap:8px;
-    padding:10px;
-  }
-
-  .menu button{
-    min-width:140px;
-    font-size:14px;
-    padding:12px;
-    white-space:nowrap;
   }
 
   .veiculos{
@@ -187,22 +179,22 @@ body{
   }
 
   .content{
-    flex:1;
     width:100%;
+    height:55vh;
   }
 
   .topbar{
     height:auto;
     flex-direction:column;
-    align-items:flex-start;
     gap:10px;
     padding:15px;
   }
 
   .topbar h2{
     font-size:18px;
-}
-.top-info{
+  }
+
+  .top-info{
     width:100%;
     display:grid;
     grid-template-columns:1fr 1fr;
@@ -210,8 +202,13 @@ body{
   }
 
   .card{
-    font-size:13px;
     text-align:center;
+    font-size:13px;
+  }
+
+  .btn-sair,
+  .btn-admin{
+    width:100%;
   }
 
   #map{
@@ -232,24 +229,20 @@ body{
     padding:20px;
   }
 
-  .modal-content input,
-  .modal-content select,
-  .salvar,
-  .cancelar{
-    font-size:16px;
-  }
-
 }
 
-@media (max-width: 500px){
+@media (max-width:500px){
 
   .top-info{
     grid-template-columns:1fr;
   }
 
-  .menu button{
-    min-width:120px;
-    font-size:13px;
+  .sidebar{
+    height:50vh;
+  }
+
+  .content{
+    height:50vh;
   }
 
   .veiculo h3{
@@ -258,10 +251,6 @@ body{
 
   .veiculo p{
     font-size:13px;
-  }
-
-  .btn-sair{
-    width:100%;
   }
 
 }
