@@ -2,54 +2,209 @@
   margin:0;
   padding:0;
   box-sizing:border-box;
-  font-family:Arial;
+  font-family:Arial,sans-serif;
 }
 
 body{
-  background:#0f172a;
+  background:#0b1120;
   color:white;
+  min-height:100vh;
   padding:20px;
 }
+
+/* =========================
+   TOPO
+========================= */
 
 .topbar{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:20px;
+  margin-bottom:25px;
+}
+
+.topbar h1{
+  font-size:42px;
+  font-weight:700;
 }
 
 .topbar button{
-  background:#dc2626;
+  background:#ef4444;
   color:white;
   border:none;
-  padding:10px 15px;
-  border-radius:10px;
+  padding:14px 22px;
+  border-radius:14px;
+  font-size:16px;
   cursor:pointer;
+  transition:.3s;
 }
+
+.topbar button:hover{
+  transform:scale(1.05);
+  background:#dc2626;
+}
+
+/* =========================
+   CARDS
+========================= */
 
 .container{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:15px;
-  margin-bottom:20px;
+  grid-template-columns:
+  repeat(auto-fit,minmax(230px,1fr));
+  gap:18px;
+  margin-bottom:30px;
 }
 
 .card{
-  background:#1e293b;
-  padding:20px;
-  border-radius:15px;
+  background:#162033;
+  border-radius:22px;
+  padding:25px;
+  box-shadow:
+  0 5px 20px rgba(0,0,0,.35);
 }
 
 .card h2{
-  margin-bottom:10px;
+  font-size:22px;
+  margin-bottom:15px;
+  color:#cbd5e1;
 }
 
 .card p{
-  font-size:32px;
+  font-size:48px;
+  font-weight:bold;
   color:#22c55e;
 }
 
-.veiculo{
-  background:#1e293b;
+/* =========================
+   FORMULARIO
+========================= */
+
+.form-box{
+  background:#162033;
+  padding:25px;
+  border-radius:22px;
+  margin-bottom:25px;
+  box-shadow:
+  0 5px 20px rgba(0,0,0,.35);
+}
+
+.form-box h2{
+  margin-bottom:20px;
+  font-size:32px;
+}
+
+.inputs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+}
+
+.inputs input,
+.inputs select{
+  background:#0f172a;
+  border:2px solid #1e293b;
+  color:white;
   padding:15px;
+  border-radius:14px;
+  outline:none;
+  font-size:16px;
+}
+
+.inputs input:focus,
+.inputs select:focus{
+  border-color:#22c55e;
+}
+
+.salvar{
+  margin-top:20px;
+  width:100%;
+  background:#22c55e;
+  color:white;
+  border:none;
+  padding:16px;
+  border-radius:16px;
+  font-size:18px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:.3s;
+}
+
+.salvar:hover{
+  transform:scale(1.02);
+  background:#16a34a;
+}
+
+/* =========================
+   LISTA
+========================= */
+
+#lista{
+  display:grid;
+  gap:15px;
+}
+
+.veiculo{
+  background:#162033;
+  border-radius:18px;
+  padding:20px;
+  box-shadow:
+  0 5px 20px rgba(0,0,0,.35);
+}
+
+.veiculo h3{
+  font-size:24px;
+  margin-bottom:8px;
+}
+
+.veiculo p{
+  color:#94a3b8;
+  margin-bottom:15px;
+  font-size:16px;
+}
+
+.veiculo button{
+  background:#ef4444;
+  color:white;
+  border:none;
+  padding:12px 18px;
+  border-radius:12px;
+  cursor:pointer;
+  font-size:15px;
+}
+
+/* =========================
+   RESPONSIVO
+========================= */
+
+@media(max-width:700px){
+
+  body{
+    padding:15px;
+  }
+
+  .topbar h1{
+    font-size:28px;
+  }
+
+  .topbar{
+    gap:15px;
+  }
+
+  .topbar button{
+    padding:12px 18px;
+  }
+
+  .card p{
+    font-size:38px;
+  }
+
+  .form-box h2{
+    font-size:26px;
+  }
+
+  .inputs{
+    grid-template-columns:1fr;
+  }
+
 }
