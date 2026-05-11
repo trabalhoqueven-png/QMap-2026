@@ -12,9 +12,14 @@ import {
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 import {
-  onAuthStateChanged
+  onAuthStateChanged,
+  signOut
 }
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+/* =========================
+   ELEMENTOS
+========================= */
 
 const lista =
 document.getElementById("lista");
@@ -24,6 +29,15 @@ document.getElementById("btnSair");
 
 const salvar =
 document.getElementById("salvar");
+
+const totalVeiculos =
+document.getElementById("totalVeiculos");
+
+const online =
+document.getElementById("online");
+
+const usuarios =
+document.getElementById("usuarios");
 
 /* =========================
    LOGIN ADMIN
@@ -65,24 +79,31 @@ async(user)=>{
     return;
   }
 
+  console.log("ADMIN LOGADO");
+
 });
 
 /* =========================
-   VOLTAR
+   SAIR
 ========================= */
 
-btnSair.onclick = ()=>{
+btnSair.onclick = async()=>{
+
+  await signOut(auth);
 
   location.href =
-  "mapa.html";
+  "index.html";
 
 };
 
 /* =========================
-   SALVAR
+   SALVAR VEICULO
 ========================= */
 
 salvar.onclick = async()=>{
+
+  const uid =
+  document.getElementById("uid").value;
 
   const nome =
   document.getElementById("nome").value;
@@ -96,36 +117,51 @@ salvar.onclick = async()=>{
   const status =
   document.getElementById("status").value;
 
-  if(!nome || !placa || !imei){
+  if(!uid || !nome || !placa || !imei){
 
     alert("Preencha tudo");
 
     return;
   }
 
-  await addDoc(
+  try{
 
-    collection(db,"veiculos"),
+    await addDoc(
 
-    {
-      uid: document.getElementById("uid").value,
-      nome,
-      placa,
-      imei,
-      status,
-      velocidade:0,
-      lat:-10.184 + (Math.random()/100),
-      lng:-48.333 + (Math.random()/100)
-    }
+      collection(db,"veiculos"),
 
-  );
+      {
+        uid,
+        nome,
+        placa,
+        imei,
+        status,
+        velocidade:0,
+        lat:-10.184 + (Math.random()/100),
+        lng:-48.333 + (Math.random()/100)
+      }
 
-  alert("Veículo salvo");
+    );
+
+    alert("Veículo salvo");
+
+    document.getElementById("uid").value = "";
+    document.getElementById("nome").value = "";
+    document.getElementById("placa").value = "";
+    document.getElementById("imei").value = "";
+
+  }catch(error){
+
+    console.log(error);
+
+    alert("Erro ao salvar");
+
+  }
 
 };
 
 /* =========================
-   LISTA
+   LISTA VEICULOS
 ========================= */
 
 onSnapshot(
@@ -136,19 +172,47 @@ onSnapshot(
 
     lista.innerHTML = "";
 
+    let total = 0;
+    let totalOnline = 0;
+
     snapshot.forEach((docSnap)=>{
+
+      total++;
 
       const v =
       docSnap.data();
 
+      if(v.status === "online"){
+
+        totalOnline++;
+
+      }
+
       const div =
       document.createElement("div");
 
+      div.className =
+      "veiculo";
+
       div.innerHTML = `
 
-        <h3>${v.nome}</h3>
+        <div class="veiculo-info">
 
-        <p>${v.placa}</p>
+          <h3>${v.nome}</h3>
+
+          <p>🚘 ${v.placa}</p>
+
+          <p>📡 ${v.imei}</p>
+
+          <p>👤 ${v.uid}</p>
+
+          <p>
+            ${v.status === "online"
+              ? "🟢 Online"
+              : "🔴 Offline"}
+          </p>
+
+        </div>
 
         <button
         onclick="excluir('${docSnap.id}')">
@@ -163,12 +227,27 @@ onSnapshot(
 
     });
 
+    totalVeiculos.innerText =
+    total;
+
+    online.innerText =
+    totalOnline;
+
   }
 
 );
 
+/* =========================
+   EXCLUIR
+========================= */
+
 window.excluir =
 async(id)=>{
+
+  const confirmar =
+  confirm("Excluir veículo?");
+
+  if(!confirmar) return;
 
   await deleteDoc(
 
