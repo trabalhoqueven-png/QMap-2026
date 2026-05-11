@@ -41,43 +41,49 @@
 
   </div>
 
-  <div class="novo-veiculo">
+  <div class="form-box">
 
   <h2>Adicionar Veículo</h2>
 
+  <div class="form-grid">
+
     <input
-  type="text"
-  id="uid"
-  placeholder="UID do usuário">
+    type="text"
+    id="uid"
+    placeholder="UID do usuário">
 
-  <input
-  type="text"
-  id="nome"
-  placeholder="Nome">
+    <input
+    type="text"
+    id="nome">
+    placeholder="Nome do veículo"
 
-  <input
-  type="text"
-  id="placa"
-  placeholder="Placa">
+    <input
+    type="text"
+    id="placa"
+    placeholder="Placa">
 
-  <input
-  type="text"
-  id="imei"
-  placeholder="IMEI">
+    <input
+    type="text"
+    id="imei"
+    placeholder="IMEI">
 
-  <select id="status">
+    <select id="status">
 
-    <option value="online">
-      Online
-    </option>
+      <option value="online">
+        Online
+      </option>
 
-    <option value="offline">
-      Offline
-    </option>
+      <option value="offline">
+        Offline
+      </option>
 
-  </select>
+    </select>
 
-  <button id="salvar">
+  </div>
+
+  <button
+  id="salvar"
+  class="salvar">
 
     Salvar Veículo
 
