@@ -15,6 +15,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // 🔹 ELEMENTOS
+const nome = document.getElementById("nome");
 const email = document.getElementById("email");
 const senha = document.getElementById("senha");
 const msgEl = document.getElementById("msg");
@@ -69,31 +70,133 @@ async function login() {
 
 // 🆕 CADASTRO
 async function cadastrar() {
-  if (!email.value || !senha.value) {
-    msg("Preencha email e senha.", "red");
+
+  if (
+    !nome.value ||
+    !email.value ||
+    !senha.value
+  ) {
+
+    msg(
+      "Preencha todos os campos.",
+      "red"
+    );
+
     return;
+
+  }
+
+  /* =========================
+     VALIDAR NOME
+  ========================= */
+
+  const nomeLimpo =
+  nome.value.trim();
+
+  const regexNome =
+  /^[A-Za-zÀ-ÿ\s]+$/;
+
+  if(nomeLimpo.length < 3){
+
+    msg(
+      "Digite seu nome verdadeiro.",
+      "red"
+    );
+
+    return;
+
+  }
+
+  if(!regexNome.test(nomeLimpo)){
+
+    msg(
+      "Nome inválido.",
+      "red"
+    );
+
+    return;
+
+  }
+
+  if(!nomeLimpo.includes(" ")){
+
+    msg(
+      "Digite nome e sobrenome.",
+      "red"
+    );
+
+    return;
+
   }
 
   try {
-    mostrarLoading();
-    const cred = await createUserWithEmailAndPassword(auth, email.value, senha.value);
-    await sendEmailVerification(cred.user);
 
-    await setDoc(doc(db, "usuarios", cred.user.uid), {
-    email: cred.user.email,
-    criadoEm: serverTimestamp(),
-    coins: 0,
-    marcacoesGratis: 2
-});
+    mostrarLoading();
+
+    const cred =
+    await createUserWithEmailAndPassword(
+      auth,
+      email.value,
+      senha.value
+    );
+
+    await sendEmailVerification(
+      cred.user
+    );
+
+    /* =========================
+       SALVAR USUARIO
+    ========================= */
+
+    await setDoc(
+
+      doc(
+        db,
+        "usuarios",
+        cred.user.uid
+      ),
+
+      {
+
+        uid: cred.user.uid,
+
+        nome: nomeLimpo,
+
+        email: cred.user.email,
+
+        admin: false,
+
+        criadoEm: serverTimestamp(),
+
+        coins: 0,
+
+        marcacoesGratis: 2
+
+      }
+
+    );
 
     await signOut(auth);
-    msg("📧 Cadastro criado! Verifique seu SPAM / GMAIL.", "lime");
 
-  } catch (e) {
-    msg(e.message, "red");
-  } finally {
-    esconderLoading();
+    msg(
+      "📧 Cadastro criado! Verifique seu email.",
+      "lime"
+    );
+
   }
+
+  catch (e) {
+
+    msg(e.message, "red");
+
+  }
+
+  finally {
+
+    esconderLoading();
+
+  }
+
 }
 
 // 🔹 EVENTOS

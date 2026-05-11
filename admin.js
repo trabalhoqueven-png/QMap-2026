@@ -7,7 +7,10 @@ import {
   onSnapshot,
   deleteDoc,
   doc,
-  getDoc
+  getDoc,
+  query,
+  where,
+  getDocs
 }
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -102,55 +105,136 @@ btnSair.onclick = async()=>{
 
 salvar.onclick = async()=>{
 
-  const uid =
-  document.getElementById("uid").value;
+  const nomeClienteInput =
+  document.getElementById("cliente")
+  .value
+  .trim();
 
   const nome =
-  document.getElementById("nome").value;
+  document.getElementById("nome")
+  .value
+  .trim();
 
   const placa =
-  document.getElementById("placa").value;
+  document.getElementById("placa")
+  .value
+  .trim();
 
   const imei =
-  document.getElementById("imei").value;
+  document.getElementById("imei")
+  .value
+  .trim();
 
   const status =
-  document.getElementById("status").value;
+  document.getElementById("status")
+  .value;
 
-  if(!uid || !nome || !placa || !imei){
+  if(
+    !nomeClienteInput ||
+    !nome ||
+    !placa ||
+    !imei
+  ){
 
     alert("Preencha tudo");
 
     return;
+
   }
 
   try{
+
+    /* =========================
+       BUSCAR USUARIO PELO NOME
+    ========================= */
+
+    const q =
+    query(
+      collection(db,"usuarios"),
+      where("nome","==",nomeClienteInput)
+    );
+
+    const querySnap =
+    await getDocs(q);
+
+    if(querySnap.empty){
+
+      alert("Cliente não encontrado");
+
+      return;
+
+    }
+
+    let uid = "";
+
+    let emailCliente = "";
+
+    let nomeCliente = "";
+
+    querySnap.forEach((docSnap)=>{
+
+      const dados =
+      docSnap.data();
+
+      /* UID CORRETO */
+      uid =
+      docSnap.id;
+
+      emailCliente =
+      dados.email || "";
+
+      nomeCliente =
+      dados.nome || "";
+
+    });
+
+    /* =========================
+       SALVAR VEICULO
+    ========================= */
 
     await addDoc(
 
       collection(db,"veiculos"),
 
       {
+
         uid,
+
+        cliente:nomeCliente,
+
+        email:emailCliente,
+
         nome,
+
         placa,
+
         imei,
+
         status,
+
         velocidade:0,
+
         lat:-10.184 + (Math.random()/100),
+
         lng:-48.333 + (Math.random()/100)
+
       }
 
     );
 
     alert("Veículo salvo");
 
-    document.getElementById("uid").value = "";
+    document.getElementById("cliente").value = "";
+
     document.getElementById("nome").value = "";
+
     document.getElementById("placa").value = "";
+
     document.getElementById("imei").value = "";
 
-  }catch(error){
+  }
+
+  catch(error){
 
     console.log(error);
 
@@ -173,6 +257,7 @@ onSnapshot(
     lista.innerHTML = "";
 
     let total = 0;
+
     let totalOnline = 0;
 
     snapshot.forEach((docSnap)=>{
@@ -204,7 +289,9 @@ onSnapshot(
 
           <p>📡 ${v.imei}</p>
 
-          <p>👤 ${v.uid}</p>
+          <p>👤 ${v.cliente}</p>
+
+          <p>📧 ${v.email}</p>
 
           <p>
             ${v.status === "online"
@@ -232,6 +319,9 @@ onSnapshot(
 
     online.innerText =
     totalOnline;
+
+    usuarios.innerText =
+    total;
 
   }
 
