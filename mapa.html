@@ -3,6 +3,7 @@
 <head>
 
   <meta charset="UTF-8">
+
   <meta name="viewport"
   content="width=device-width, initial-scale=1.0">
 
@@ -29,7 +30,9 @@
     <button
     id="btnAdmin"
     class="btn-admin">
+
       ADMIN
+
     </button>
 
   </div>
@@ -43,13 +46,19 @@
   <div class="cards">
 
     <div class="card">
+
       <h3>Online</h3>
+
       <p id="onlineCount">0</p>
+
     </div>
 
     <div class="card">
+
       <h3>Veículos</h3>
+
       <p id="veiculosCount">0</p>
+
     </div>
 
   </div>
@@ -60,27 +69,84 @@
   class="veiculos"
   id="listaVeiculos"></div>
 
+  <!-- CHAT -->
+
+  <div
+  class="chat-box"
+  id="chatBox">
+
+    <div
+    class="chat-topo">
+
+      <h3>Chat Global</h3>
+
+      <button id="fecharChat">
+
+        ✕
+
+      </button>
+
+    </div>
+
+    <div
+    class="chat-mensagens"
+    id="chatMensagens"></div>
+
+    <div class="chat-input">
+
+      <input
+      type="text"
+      id="mensagem"
+      placeholder="Digite uma mensagem">
+
+      <button
+      id="enviarMsg">
+
+        Enviar
+
+      </button>
+
+    </div>
+
+  </div>
+
   <!-- MENU -->
 
   <div class="bottom-menu">
 
     <button>
+
       <i class="fa-solid fa-map"></i>
+
       <span>Mapa</span>
+
     </button>
 
     <button id="btnVeiculos">
+
       <i class="fa-solid fa-car"></i>
+
       <span>Veículos</span>
+
+    </button>
+
+    <button id="btnChat">
+
+      <i class="fa-solid fa-comments"></i>
+
+      <span>Chat</span>
+
     </button>
 
     <button id="btnSair">
+
       <i class="fa-solid fa-right-from-bracket"></i>
+
       <span>Sair</span>
+
     </button>
 
   </div>
-
 
   <script
   src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
