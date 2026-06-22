@@ -10,7 +10,8 @@ import {
   getDoc,
   query,
   where,
-  deleteDoc
+  deleteDoc,
+  updateDoc
 }
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -19,6 +20,42 @@ import {
   signOut
 }
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+navigator.geolocation.watchPosition(
+
+async(pos)=>{
+
+  const lat =
+  pos.coords.latitude;
+
+  const lng =
+  pos.coords.longitude;
+
+  await updateDoc(
+
+    doc(db,"usuarios",user.uid),
+
+    {
+      lat,
+      lng,
+      ultimaAtualizacao: Date.now()
+    }
+
+  );
+
+},
+
+(err)=>{
+  console.log(err);
+},
+
+{
+  enableHighAccuracy:true,
+  maximumAge:0,
+  timeout:10000
+}
+
+);
 
 const map =
 L.map("map")
@@ -244,3 +281,41 @@ async(id)=>{
   );
 
 };
+
+let meuMarker = null;
+
+navigator.geolocation.watchPosition(
+
+(pos)=>{
+
+  const lat =
+  pos.coords.latitude;
+
+  const lng =
+  pos.coords.longitude;
+
+  if(!meuMarker){
+
+    meuMarker =
+    L.marker([lat,lng])
+
+    .addTo(map)
+
+    .bindPopup("Minha Localização");
+
+    map.setView(
+      [lat,lng],
+      16
+    );
+
+  }else{
+
+    meuMarker.setLatLng(
+      [lat,lng]
+    );
+
+  }
+
+}
+
+);
