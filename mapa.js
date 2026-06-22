@@ -56,10 +56,6 @@ async(pos)=>{
 
 );
 
-const map =
-L.map("map")
-.setView([-10.184,-48.333],13);
-
 L.tileLayer(
 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 {
