@@ -10,7 +10,8 @@ import {
   query,
   where,
   deleteDoc,
-  updateDoc
+  updateDoc,
+  serverTimestamp
 }
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -19,42 +20,6 @@ import {
   signOut
 }
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-navigator.geolocation.watchPosition(
-
-async(pos)=>{
-
-  const lat =
-  pos.coords.latitude;
-
-  const lng =
-  pos.coords.longitude;
-
-  await updateDoc(
-
-    doc(db,"usuarios",user.uid),
-
-    {
-      lat,
-      lng,
-      ultimaAtualizacao: Date.now()
-    }
-
-  );
-
-},
-
-(err)=>{
-  console.log(err);
-},
-
-{
-  enableHighAccuracy:true,
-  maximumAge:0,
-  timeout:10000
-}
-
-);
 
 const map =
 L.map("map")
@@ -65,6 +30,25 @@ L.tileLayer(
   attribution:'© OpenStreetMap'
 }
 ).addTo(map);
+
+const btnCorrida =
+document.getElementById("btnCorrida");
+
+const painelCorrida =
+document.getElementById("painelCorrida");
+
+const btnChamarCorrida =
+document.getElementById("btnChamarCorrida");
+
+let destinoLat = null;
+let destinoLng = null;
+
+let minhaLat = null;
+let minhaLng = null;
+
+let marcadorDestino = null;
+
+let meuMarker = null;
 
 const listaVeiculos =
 document.getElementById("listaVeiculos");
@@ -263,6 +247,142 @@ function renderizar(){
 
 }
 
+navigator.geolocation.watchPosition(
+
+(pos)=>{
+
+  minhaLat =
+  pos.coords.latitude;
+
+  minhaLng =
+  pos.coords.longitude;
+
+  if(!meuMarker){
+
+    meuMarker =
+    L.marker([minhaLat,minhaLng])
+    .addTo(map)
+    .bindPopup("Você");
+
+    map.setView(
+      [minhaLat,minhaLng],
+      16
+    );
+
+  }else{
+
+    meuMarker.setLatLng(
+      [minhaLat,minhaLng]
+    );
+
+  }
+
+}
+
+);
+
+document
+.getElementById(
+"btnSelecionarDestino"
+)
+.onclick = ()=>{
+
+  alert(
+  "Clique no mapa para escolher o destino"
+  );
+
+};
+
+map.on("click",(e)=>{
+
+  destinoLat =
+  e.latlng.lat;
+
+  destinoLng =
+  e.latlng.lng;
+
+  if(marcadorDestino){
+
+    map.removeLayer(
+      marcadorDestino
+    );
+
+  }
+
+  marcadorDestino =
+  L.marker(
+    [destinoLat,destinoLng]
+  )
+  .addTo(map)
+  .bindPopup("Destino");
+
+});
+
+btnChamarCorrida.onclick =
+async()=>{
+
+  if(
+    !destinoLat ||
+    !destinoLng
+  ){
+
+    alert(
+    "Selecione o destino"
+    );
+
+    return;
+
+  }
+
+  const user =
+  auth.currentUser;
+
+  await addDoc(
+
+    collection(
+      db,
+      "corridas"
+    ),
+
+    {
+
+      passageiroUid:
+      user.uid,
+
+      origemLat:
+      minhaLat,
+
+      origemLng:
+      minhaLng,
+
+      destinoLat,
+
+      destinoLng,
+
+      status:
+      "aguardando",
+
+      motoristaUid:
+      null,
+
+      criadoEm:
+      serverTimestamp()
+
+    }
+
+  );
+
+  alert(
+  "Corrida solicitada!"
+  );
+
+};
+
+btnCorrida.onclick = ()=>{
+
+  painelCorrida.classList.toggle("ativo");
+
+};
 
 window.excluirVeiculo =
 async(id)=>{
@@ -279,41 +399,3 @@ async(id)=>{
   );
 
 };
-
-let meuMarker = null;
-
-navigator.geolocation.watchPosition(
-
-(pos)=>{
-
-  const lat =
-  pos.coords.latitude;
-
-  const lng =
-  pos.coords.longitude;
-
-  if(!meuMarker){
-
-    meuMarker =
-    L.marker([lat,lng])
-
-    .addTo(map)
-
-    .bindPopup("Minha Localização");
-
-    map.setView(
-      [lat,lng],
-      16
-    );
-
-  }else{
-
-    meuMarker.setLatLng(
-      [lat,lng]
-    );
-
-  }
-
-}
-
-);
