@@ -13,247 +13,216 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-const map = L.map("map").setView(
-  [-17.8, -50.9],
-  13
-);
+/* =========================
+   MAPA
+========================= */
 
-L.tileLayer(
-  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-  {
-    attribution:"© OpenStreetMap"
-  }
-).addTo(map);
+const map = L.map("map").setView([-17.8, -50.9], 13);
 
-const listaCorridas =
-document.getElementById("listaCorridas");
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "© OpenStreetMap"
+}).addTo(map);
+
+/* =========================
+   VARIÁVEIS
+========================= */
+
+const listaCorridas = document.getElementById("listaCorridas");
 
 let motoristaUid = null;
-let markers = [];
 
-onAuthStateChanged(
-  auth,
-  (user)=>{
+let corridaAtual = null;
 
-    if(!user){
+let minhaLat = null;
+let minhaLng = null;
 
-      location.href =
-      "index.html";
+let marcadorMotorista = null;
+let marcadorPassageiro = null;
+let marcadorDestino = null;
 
-      return;
-    }
+let rotaControl = null;
 
-    motoristaUid =
-    user.uid;
+/* =========================
+   LOGIN
+========================= */
 
-    console.log(
-      "Motorista Logado:",
-      motoristaUid
-    );
+onAuthStateChanged(auth, (user) => {
 
-    iniciarGPS();
-    carregarCorridas();
-
+  if (!user) {
+    location.href = "index.html";
+    return;
   }
-);
 
-function iniciarGPS(){
+  motoristaUid = user.uid;
 
-  navigator.geolocation.watchPosition(
+  iniciarGPS();
+  carregarCorridas();
 
-    async(pos)=>{
+});
 
-      const lat =
-      pos.coords.latitude;
+/* =========================
+   GPS MOTORISTA
+========================= */
 
-      const lng =
-      pos.coords.longitude;
+function iniciarGPS() {
 
-      try{
+  navigator.geolocation.watchPosition(async (pos) => {
 
-        await updateDoc(
+    minhaLat = pos.coords.latitude;
+    minhaLng = pos.coords.longitude;
 
-          doc(
-            db,
-            "usuarios",
-            motoristaUid
-          ),
-
-          {
-            lat,
-            lng,
-            online:true
-          }
-
-        );
-
-      }catch(e){
-
-        console.error(
-          "Erro GPS:",
-          e
-        );
-
-      }
-
-    },
-
-    (err)=>{
-
-      console.log(
-        "Erro GPS:",
-        err
-      );
-
-    },
-
-    {
-      enableHighAccuracy:true
+    // marcador motorista
+    if (!marcadorMotorista) {
+      marcadorMotorista = L.marker([minhaLat, minhaLng])
+        .addTo(map)
+        .bindPopup("Você");
+    } else {
+      marcadorMotorista.setLatLng([minhaLat, minhaLng]);
     }
 
-  );
+    // atualizar corrida ativa
+    if (corridaAtual) {
+      desenharRota();
+    }
 
+    await updateDoc(doc(db, "usuarios", motoristaUid), {
+      lat: minhaLat,
+      lng: minhaLng,
+      online: true
+    });
+
+  }, console.log, {
+    enableHighAccuracy: true
+  });
 }
 
-function carregarCorridas(){
+/* =========================
+   CORRIDAS DISPONÍVEIS
+========================= */
 
-  console.log(
-    "Escutando corridas..."
-  );
+function carregarCorridas() {
 
   const q = query(
-    collection(db,"corridas"),
-    where(
-      "status",
-      "==",
-      "aguardando"
-    )
+    collection(db, "corridas"),
+    where("status", "==", "aguardando")
   );
 
-  onSnapshot(
+  onSnapshot(q, (snapshot) => {
 
-    q,
+    listaCorridas.innerHTML = "";
 
-    (snapshot)=>{
+    snapshot.forEach((docSnap) => {
 
-      console.log(
-        "Corridas encontradas:",
-        snapshot.size
-      );
+      const corrida = {
+        id: docSnap.id,
+        ...docSnap.data()
+      };
 
-      listaCorridas.innerHTML="";
+      const div = document.createElement("div");
 
-      markers.forEach(m=>{
-        map.removeLayer(m);
-      });
+      div.className = "corrida";
 
-      markers=[];
-
-      snapshot.forEach((docSnap)=>{
-
-        const corrida = {
-
-          id:docSnap.id,
-          ...docSnap.data()
-
-        };
-
-        console.log(
-          "Corrida:",
-          corrida
-        );
-
-        const div =
-        document.createElement("div");
-
-        div.className =
-        "corrida";
-
-        div.innerHTML = `
-
-        <p>
-        Origem:
-        ${corrida.origemLat},
-        ${corrida.origemLng}
-        </p>
-
-        <p>
-        Destino:
-        ${corrida.destinoLat},
-        ${corrida.destinoLng}
-        </p>
-
-        <button
-        onclick="aceitarCorrida('${corrida.id}')">
-        Aceitar Corrida
+      div.innerHTML = `
+        <p><b>Origem:</b> ${corrida.origemLat}, ${corrida.origemLng}</p>
+        <p><b>Destino:</b> ${corrida.destinoLat}, ${corrida.destinoLng}</p>
+        <button onclick="aceitarCorrida('${corrida.id}')">
+          Aceitar
         </button>
+      `;
 
-        `;
+      listaCorridas.appendChild(div);
 
-        listaCorridas.appendChild(div);
-
-        const markerOrigem =
-        L.marker([
-          corrida.origemLat,
-          corrida.origemLng
-        ])
+      L.marker([corrida.origemLat, corrida.origemLng])
         .addTo(map)
-        .bindPopup(
-          "Passageiro"
-        );
+        .bindPopup("Passageiro");
 
-        markers.push(
-          markerOrigem
-        );
+    });
 
-      });
-
-    },
-
-    (erro)=>{
-
-      console.error(
-        "Erro Firestore:",
-        erro
-      );
-
-    }
-
-  );
-
+  });
 }
 
-window.aceitarCorrida =
-async(id)=>{
+/* =========================
+   ACEITAR CORRIDA
+========================= */
 
-  try{
+window.aceitarCorrida = async (id) => {
 
-    await updateDoc(
+  await updateDoc(doc(db, "corridas", id), {
+    status: "aceita",
+    motoristaUid
+  });
 
-      doc(
-        db,
-        "corridas",
-        id
-      ),
+  ouvirCorrida(id);
 
-      {
-        status:"aceita",
-        motoristaUid
-      }
+  alert("Corrida aceita!");
+};
 
-    );
+/* =========================
+   ESCUTAR CORRIDA ATIVA
+========================= */
 
-    alert(
-      "Corrida aceita!"
-    );
+function ouvirCorrida(id) {
 
-  }catch(e){
+  onSnapshot(doc(db, "corridas", id), (snap) => {
 
-    console.error(
-      "Erro ao aceitar:",
-      e
-    );
+    if (!snap.exists()) return;
 
+    corridaAtual = snap.data();
+
+    atualizarMapa();
+  });
+}
+
+/* =========================
+   MAPA (PASSAGEIRO + DESTINO)
+========================= */
+
+function atualizarMapa() {
+
+  if (!corridaAtual) return;
+
+  if (marcadorPassageiro) map.removeLayer(marcadorPassageiro);
+  if (marcadorDestino) map.removeLayer(marcadorDestino);
+
+  marcadorPassageiro = L.marker([
+    corridaAtual.origemLat,
+    corridaAtual.origemLng
+  ]).addTo(map).bindPopup("Passageiro");
+
+  marcadorDestino = L.marker([
+    corridaAtual.destinoLat,
+    corridaAtual.destinoLng
+  ]).addTo(map).bindPopup("Destino");
+
+  map.fitBounds([
+    [corridaAtual.origemLat, corridaAtual.origemLng],
+    [corridaAtual.destinoLat, corridaAtual.destinoLng]
+  ]);
+
+  desenharRota();
+}
+
+/* =========================
+   ROTA (TIPO UBER)
+========================= */
+
+function desenharRota() {
+
+  if (!corridaAtual || !minhaLat) return;
+
+  if (rotaControl) {
+    map.removeControl(rotaControl);
   }
 
-};
+  rotaControl = L.Routing.control({
+    waypoints: [
+      L.latLng(minhaLat, minhaLng),
+      L.latLng(corridaAtual.origemLat, corridaAtual.origemLng),
+      L.latLng(corridaAtual.destinoLat, corridaAtual.destinoLng)
+    ],
+    routeWhileDragging: false,
+    addWaypoints: false,
+    draggableWaypoints: false,
+    createMarker: () => null
+  }).addTo(map);
+}
