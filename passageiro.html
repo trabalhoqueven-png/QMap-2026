@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport"
+  content="width=device-width, initial-scale=1.0">
+
+  <title>QMap Monitor</title>
+
+  <link rel="stylesheet"
+  href="https://unpkg.com/leaflet/dist/leaflet.css">
+
+  <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <link rel="stylesheet"
+  href="mapa.css">
+
+</head>
+<body>
+
+  <!-- TOPO -->
+
+  <div class="topbar">
+
+    <h2>QMap</h2>
+
+    
+      <h3>Motorista Online</h3>
+      <p id="veiculosCount">0</p>
+
+
+    <button
+    id="btnAdmin"
+    class="btn-admin">
+      ADMIN
+    </button>
+
+  </div>
+
+  <!-- MAPA -->
+
+  <div id="map"></div>
+
+  <!-- CARDS -->
+
+  <div class="cards">
+
+    <div class="card">
+      <h3>Online</h3>
+      <p id="onlineCount">0</p>
+    </div>
+
+    <div class="card">
+      <h3>Veículos</h3>
+      <p id="veiculosCount">0</p>
+    </div>
+
+  </div>
+
+  <!-- LISTA -->
+
+  <div
+  class="veiculos"
+  id="listaVeiculos"></div>
+
+<div
+class="veiculos"
+id="painelCorrida">
+
+  <div class="veiculo">
+
+    <h3>Solicitar Corrida</h3>
+
+    <button
+    id="btnSelecionarDestino">
+
+      Selecionar Destino
+
+    </button>
+
+    <button
+    id="btnChamarCorrida">
+
+      Chamar Motorista
+
+    </button>
+
+  </div>
+
+</div>
+
+  <!-- MENU -->
+
+  <div class="bottom-menu">
+
+    <button id="btnCorrida">
+  <i class="fa-solid fa-map"></i>
+  <span>Corrida</span>
+</button>
+
+    <button id="btnVeiculos">
+      <i class="fa-solid fa-car"></i>
+      <span>Veículos</span>
+    </button>
+
+    <button id="btnSair">
+      <i class="fa-solid fa-right-from-bracket"></i>
+      <span>Sair</span>
+    </button>
+
+  </div>
+
+
+  <script
+  src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <script
+  type="module"
+  src="mapa.js"></script>
+
+</body>
+</html>

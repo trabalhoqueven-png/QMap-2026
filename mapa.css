@@ -250,3 +250,19 @@ body{
   background:#ef4444;
   color:white;
 }
+#painelCorrida{
+  right:-360px;
+}
+
+#painelCorrida.ativo{
+  right:0;
+}
+
+#painelCorrida input{
+  width:100%;
+  height:45px;
+  border:none;
+  border-radius:10px;
+  background:#f1f5f9;
+  padding:10px;
+}

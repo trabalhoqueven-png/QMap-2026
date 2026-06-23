@@ -11,6 +11,7 @@ import {
 import {
   doc,
   setDoc,
+  getDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -18,6 +19,7 @@ import {
 const nome = document.getElementById("nome");
 const email = document.getElementById("email");
 const senha = document.getElementById("senha");
+const tipo = document.getElementById("tipo");
 const msgEl = document.getElementById("msg");
 const btnLogin = document.getElementById("btnLogin");
 const btnCadastro = document.getElementById("btnCadastro");
@@ -44,28 +46,107 @@ function esconderLoading() {
 
 // 🔐 LOGIN
 async function login() {
+
   if (!email.value || !senha.value) {
-    msg("Preencha email e senha.", "red");
+
+    msg(
+      "Preencha email e senha.",
+      "red"
+    );
+
     return;
   }
 
   try {
+
     mostrarLoading();
-    const cred = await signInWithEmailAndPassword(auth, email.value, senha.value);
+
+    const cred =
+    await signInWithEmailAndPassword(
+      auth,
+      email.value,
+      senha.value
+    );
 
     if (!cred.user.emailVerified) {
+
       await signOut(auth);
-      msg("❌ Confirme seu email antes de entrar.", "red");
+
+      msg(
+        "❌ Confirme seu email antes de entrar.",
+        "red"
+      );
+
       return;
     }
 
-    location.replace("mapa.html");
+    const userRef =
+    doc(
+      db,
+      "usuarios",
+      cred.user.uid
+    );
 
-  } catch (e) {
-    msg("❌ Email ou senha inválidos.", "red");
-  } finally {
-    esconderLoading();
+    const userSnap =
+    await getDoc(userRef);
+
+    if(!userSnap.exists()){
+
+      msg(
+        "Usuário não encontrado.",
+        "red"
+      );
+
+      return;
+    }
+
+    const dados =
+    userSnap.data();
+
+    if(dados.admin){
+
+      location.replace(
+        "admin.html"
+      );
+
+    }
+
+    else if(
+      dados.tipo ===
+      "motorista"
+    ){
+
+      location.replace(
+        "motorista.html"
+      );
+
+    }
+
+    else{
+
+      location.replace(
+        "passageiro.html"
+      );
+
+    }
+
   }
+
+  catch(e){
+
+    msg(
+      "❌ Email ou senha inválidos.",
+      "red"
+    );
+
+  }
+
+  finally{
+
+    esconderLoading();
+
+  }
+
 }
 
 // 🆕 CADASTRO
@@ -149,32 +230,32 @@ async function cadastrar() {
     ========================= */
 
     await setDoc(
+  doc(
+    db,
+    "usuarios",
+    cred.user.uid
+  ),
+  {
+    uid: cred.user.uid,
+    nome: nomeLimpo,
+    email: cred.user.email,
 
-      doc(
-        db,
-        "usuarios",
-        cred.user.uid
-      ),
+    tipo: tipo.value,
 
-      {
+    admin: false,
 
-        uid: cred.user.uid,
+    online: false,
 
-        nome: nomeLimpo,
+    lat: null,
+    lng: null,
 
-        email: cred.user.email,
+    coins: 0,
 
-        admin: false,
+    marcacoesGratis: 2,
 
-        criadoEm: serverTimestamp(),
-
-        coins: 0,
-
-        marcacoesGratis: 2
-
-      }
-
-    );
+    criadoEm: serverTimestamp()
+  }
+);
 
     await signOut(auth);
 
@@ -213,10 +294,55 @@ btnCadastro.addEventListener("click", cadastrar);
 });
 
 // 🚧 BLOQUEAR LOGIN SE JÁ ESTIVER LOGADO
-onAuthStateChanged(auth, user => {
-  if (user && user.emailVerified) {
-    location.replace("mapa.html");
+onAuthStateChanged(auth, async(user)=>{
+
+  if(
+    !user ||
+    !user.emailVerified
+  ) return;
+
+  const userRef =
+  doc(
+    db,
+    "usuarios",
+    user.uid
+  );
+
+  const userSnap =
+  await getDoc(userRef);
+
+  if(!userSnap.exists()) return;
+
+  const dados =
+  userSnap.data();
+
+  if(dados.admin){
+
+    location.replace(
+      "admin.html"
+    );
+
   }
+
+  else if(
+    dados.tipo ===
+    "motorista"
+  ){
+
+    location.replace(
+      "motorista.html"
+    );
+
+  }
+
+  else{
+
+    location.replace(
+      "passageiro.html"
+    );
+
+  }
+
 });
 
 /* =========================
