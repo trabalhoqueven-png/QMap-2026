@@ -249,9 +249,6 @@ async function cadastrar() {
     lat: null,
     lng: null,
 
-    coins: 0,
-
-    marcacoesGratis: 2,
 
     criadoEm: serverTimestamp()
   }
