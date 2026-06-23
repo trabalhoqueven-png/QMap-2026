@@ -1,212 +1,260 @@
+javascript
 import { auth, db } from "./firebase.js";
 
 import {
-collection,
-onSnapshot,
-query,
-where,
-doc,
-updateDoc
-}
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  collection,
+  onSnapshot,
+  query,
+  where,
+  doc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 import {
-onAuthStateChanged
-}
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-const map =
-L.map("map")
-.setView([-17.8,-50.9],13);
+const map = L.map("map").setView(
+  [-17.8, -50.9],
+  13
+);
 
 L.tileLayer(
-"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-{
-attribution:"© OpenStreetMap"
-}
+  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {
+    attribution:"© OpenStreetMap"
+  }
 ).addTo(map);
 
 const listaCorridas =
-document.getElementById(
-"listaCorridas"
-);
+document.getElementById("listaCorridas");
 
 let motoristaUid = null;
-
 let markers = [];
 
 onAuthStateChanged(
-auth,
-(user)=>{
+  auth,
+  (user)=>{
 
-if(!user){
+    if(!user){
 
-location.href =
-"index.html";
+      location.href =
+      "index.html";
 
-return;
+      return;
+    }
 
-}
+    motoristaUid =
+    user.uid;
 
-motoristaUid =
-user.uid;
+    console.log(
+      "Motorista Logado:",
+      motoristaUid
+    );
 
-iniciarGPS();
+    iniciarGPS();
+    carregarCorridas();
 
-carregarCorridas();
-
-}
+  }
 );
 
 function iniciarGPS(){
 
-navigator.geolocation.watchPosition(
+  navigator.geolocation.watchPosition(
 
-async(pos)=>{
+    async(pos)=>{
 
-const lat =
-pos.coords.latitude;
+      const lat =
+      pos.coords.latitude;
 
-const lng =
-pos.coords.longitude;
+      const lng =
+      pos.coords.longitude;
 
-await updateDoc(
+      try{
 
-doc(
-db,
-"usuarios",
-motoristaUid
-),
+        await updateDoc(
 
-{
-lat,
-lng,
-online:true
-}
+          doc(
+            db,
+            "usuarios",
+            motoristaUid
+          ),
 
-);
+          {
+            lat,
+            lng,
+            online:true
+          }
 
-},
+        );
 
-(err)=>{
-console.log(err);
-},
+      }catch(e){
 
-{
-enableHighAccuracy:true
-}
+        console.error(
+          "Erro GPS:",
+          e
+        );
 
-);
+      }
+
+    },
+
+    (err)=>{
+
+      console.log(
+        "Erro GPS:",
+        err
+      );
+
+    },
+
+    {
+      enableHighAccuracy:true
+    }
+
+  );
 
 }
 
 function carregarCorridas(){
 
-onSnapshot(
+  console.log(
+    "Escutando corridas..."
+  );
 
-query(
-collection(db,"corridas"),
-where(
-"status",
-"==",
-"aguardando"
-)
-),
+  const q = query(
+    collection(db,"corridas"),
+    where(
+      "status",
+      "==",
+      "aguardando"
+    )
+  );
 
-(snapshot)=>{
+  onSnapshot(
 
-listaCorridas.innerHTML="";
+    q,
 
-markers.forEach(m=>{
-map.removeLayer(m);
-});
+    (snapshot)=>{
 
-markers=[];
+      console.log(
+        "Corridas encontradas:",
+        snapshot.size
+      );
 
-snapshot.forEach((docSnap)=>{
+      listaCorridas.innerHTML="";
 
-const corrida = {
+      markers.forEach(m=>{
+        map.removeLayer(m);
+      });
 
-id:docSnap.id,
+      markers=[];
 
-...docSnap.data()
+      snapshot.forEach((docSnap)=>{
 
-};
+        const corrida = {
 
-const div =
-document.createElement("div");
+          id:docSnap.id,
+          ...docSnap.data()
 
-div.className =
-"corrida";
+        };
 
-div.innerHTML = `
+        console.log(
+          "Corrida:",
+          corrida
+        );
 
-<p>
-Origem:
-${corrida.origemLat}
-,
-${corrida.origemLng}
-</p>
+        const div =
+        document.createElement("div");
 
-<p>
-Destino:
-${corrida.destinoLat}
-,
-${corrida.destinoLng}
-</p>
+        div.className =
+        "corrida";
 
-<button
-onclick="aceitarCorrida('${corrida.id}')">
-Aceitar Corrida
-</button>
+        div.innerHTML = `
 
-`;
+        <p>
+        Origem:
+        ${corrida.origemLat},
+        ${corrida.origemLng}
+        </p>
 
-listaCorridas
-.appendChild(div);
+        <p>
+        Destino:
+        ${corrida.destinoLat},
+        ${corrida.destinoLng}
+        </p>
 
-const markerOrigem =
-L.marker([
-corrida.origemLat,
-corrida.origemLng
-])
-.addTo(map)
-.bindPopup(
-"Passageiro"
-);
+        <button
+        onclick="aceitarCorrida('${corrida.id}')">
+        Aceitar Corrida
+        </button>
 
-markers.push(
-markerOrigem
-);
+        `;
 
-});
+        listaCorridas.appendChild(div);
 
-}
+        const markerOrigem =
+        L.marker([
+          corrida.origemLat,
+          corrida.origemLng
+        ])
+        .addTo(map)
+        .bindPopup(
+          "Passageiro"
+        );
 
-);
+        markers.push(
+          markerOrigem
+        );
+
+      });
+
+    },
+
+    (erro)=>{
+
+      console.error(
+        "Erro Firestore:",
+        erro
+      );
+
+    }
+
+  );
 
 }
 
 window.aceitarCorrida =
 async(id)=>{
 
-await updateDoc(
+  try{
 
-doc(
-db,
-"corridas",
-id
-),
+    await updateDoc(
 
-{
-status:"aceita",
-motoristaUid
-}
+      doc(
+        db,
+        "corridas",
+        id
+      ),
 
-);
+      {
+        status:"aceita",
+        motoristaUid
+      }
 
-alert(
-"Corrida aceita!"
-);
+    );
+
+    alert(
+      "Corrida aceita!"
+    );
+
+  }catch(e){
+
+    console.error(
+      "Erro ao aceitar:",
+      e
+    );
+
+  }
 
 };
