@@ -87,10 +87,10 @@ function iniciarGPS() {
     }
 
     await updateDoc(doc(db, "usuarios", motoristaUid), {
-      lat: minhaLat,
-      lng: minhaLng,
-      online: true
-    });
+    lat: minhaLat,
+    lng: minhaLng,
+    online: motoristaOnline
+});
 
   }, console.log, {
     enableHighAccuracy: true
@@ -313,22 +313,26 @@ if (btnPerfil) {
 // SAIR
 const btnSair = document.getElementById("btnSair");
 
-if (btnSair) {
+if (btnSair)
 
   btnSair.onclick = async () => {
 
     try {
 
-      await signOut(auth);
+        await updateDoc(doc(db,"usuarios",motoristaUid),{
 
-      location.href = "index.html";
+            online:false
 
-    } catch (erro) {
+        });
 
-      console.error(erro);
+        await signOut(auth);
+
+        location.href="index.html";
+
+    } catch(e){
+
+        console.log(e);
 
     }
 
-  };
-
-}
+};

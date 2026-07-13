@@ -50,6 +50,8 @@ let marcadorDestino = null;
 
 let meuMarker = null;
 
+let motoristasMarkers = [];
+
 const listaVeiculos =
 document.getElementById("listaVeiculos");
 
@@ -121,10 +123,12 @@ onAuthStateChanged(auth, async(user)=>{
 
   if(!user){
 
-    location.href = "index.html";
+    location.href="index.html";
     return;
 
-  }
+}
+
+carregarMotoristasOnline();
 
   const userRef =
   doc(db,"usuarios",user.uid);
@@ -399,3 +403,41 @@ async(id)=>{
   );
 
 };
+/*==========================
+ MOTORISTAS ONLINE
+==========================*/
+
+function carregarMotoristasOnline(){
+
+    const q = query(
+        collection(db,"usuarios"),
+        where("tipo","==","motorista"),
+        where("online","==",true)
+    );
+
+    onSnapshot(q,(snapshot)=>{
+
+        onlineCount.innerText = snapshot.size;
+
+        motoristasMarkers.forEach(m=>map.removeLayer(m));
+        motoristasMarkers=[];
+
+        snapshot.forEach((docSnap)=>{
+
+            const motorista=docSnap.data();
+
+            if(motorista.lat && motorista.lng){
+
+                const marker=L.marker([motorista.lat,motorista.lng])
+                .addTo(map)
+                .bindPopup("🚗 "+motorista.nome);
+
+                motoristasMarkers.push(marker);
+
+            }
+
+        });
+
+    });
+
+}
