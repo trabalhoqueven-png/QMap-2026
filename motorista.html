@@ -1,76 +1,84 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Painel Motorista</title>
+    <title>QMap Motorista</title>
 
-<link rel="stylesheet"
-href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <!-- CSS -->
+    <link rel="stylesheet" href="motorista.css">
 
-<style>
-
-body{
-margin:0;
-font-family:Arial;
-}
-
-#map{
-height:100vh;
-width:100%;
-}
-
-.painel{
-position:fixed;
-top:10px;
-left:10px;
-width:320px;
-max-height:90vh;
-overflow:auto;
-background:white;
-padding:10px;
-border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,.3);
-z-index:999;
-}
-
-.corrida{
-padding:10px;
-margin-bottom:10px;
-border:1px solid #ddd;
-border-radius:10px;
-}
-
-button{
-width:100%;
-height:40px;
-border:none;
-background:#16a34a;
-color:white;
-border-radius:8px;
-cursor:pointer;
-}
-
-</style>
+    <!-- Leaflet -->
+    <link rel="stylesheet"
+        href="https://unpkg.com/leaflet/dist/leaflet.css">
 
 </head>
+
 <body>
 
-<div class="painel">
+    <!-- TOPO -->
+    <div class="topbar">
 
-<h2>Corridas Disponíveis</h2>
+        <h2>QMap Motorista</h2>
 
-<div id="listaCorridas"></div>
+        <button id="btnOffline">
+            🟢 Online
+        </button>
 
-</div>
+    </div>
 
-<div id="map"></div>
+    <!-- PAINEL DE CORRIDAS -->
+    <div class="painel">
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <h2>Corridas Disponíveis</h2>
 
-<script type="module" src="motorista.js"></script>
+        <div id="listaCorridas"></div>
+
+    </div>
+
+    <!-- MAPA -->
+    <div id="map"></div>
+
+    <!-- MENU INFERIOR -->
+    <div class="bottom-menu">
+
+        <button id="btnInicio">
+            🏠
+            <span>Início</span>
+        </button>
+
+        <button id="btnCorridas">
+            🚖
+            <span>Corridas</span>
+        </button>
+
+        <button id="btnPerfil">
+            👤
+            <span>Perfil</span>
+        </button>
+
+        <button id="btnSair">
+            🚪
+            <span>Sair</span>
+        </button>
+
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <!-- Leaflet Routing Machine -->
+    <link rel="stylesheet"
+        href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css">
+
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+
+    <!-- Seu JavaScript -->
+    <script type="module" src="motorista.js"></script>
 
 </body>
+
 </html>

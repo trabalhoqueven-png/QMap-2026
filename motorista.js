@@ -10,7 +10,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 import {
-  onAuthStateChanged
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 /* =========================
@@ -225,4 +226,109 @@ function desenharRota() {
     draggableWaypoints: false,
     createMarker: () => null
   }).addTo(map);
+}
+
+/* =========================
+   BOTÕES DO PAINEL
+========================= */
+
+let motoristaOnline = true;
+
+// CENTRALIZAR MAPA
+const btnInicio = document.getElementById("btnInicio");
+
+if (btnInicio) {
+
+  btnInicio.onclick = () => {
+
+    if (minhaLat && minhaLng) {
+
+      map.setView([minhaLat, minhaLng], 18);
+
+    }
+
+  };
+
+}
+
+// MOSTRAR / ESCONDER CORRIDAS
+const btnCorridas = document.getElementById("btnCorridas");
+
+if (btnCorridas) {
+
+  btnCorridas.onclick = () => {
+
+    const painel = document.querySelector(".painel");
+
+    if (painel.style.display === "none") {
+
+      painel.style.display = "block";
+
+    } else {
+
+      painel.style.display = "none";
+
+    }
+
+  };
+
+}
+
+// ONLINE / OFFLINE
+const btnOffline = document.getElementById("btnOffline");
+
+if (btnOffline) {
+
+  btnOffline.onclick = async () => {
+
+    motoristaOnline = !motoristaOnline;
+
+    await updateDoc(doc(db, "usuarios", motoristaUid), {
+
+      online: motoristaOnline
+
+    });
+
+    btnOffline.innerHTML = motoristaOnline
+      ? "🟢 Online"
+      : "🔴 Offline";
+
+  };
+
+}
+
+// PERFIL
+const btnPerfil = document.getElementById("btnPerfil");
+
+if (btnPerfil) {
+
+  btnPerfil.onclick = () => {
+
+    alert("Perfil do motorista (em desenvolvimento)");
+
+  };
+
+}
+
+// SAIR
+const btnSair = document.getElementById("btnSair");
+
+if (btnSair) {
+
+  btnSair.onclick = async () => {
+
+    try {
+
+      await signOut(auth);
+
+      location.href = "index.html";
+
+    } catch (erro) {
+
+      console.error(erro);
+
+    }
+
+  };
+
 }
