@@ -124,12 +124,35 @@ function carregarCorridas() {
       div.className = "corrida";
 
       div.innerHTML = `
-        <p><b>Origem:</b> ${corrida.origemLat}, ${corrida.origemLng}</p>
-        <p><b>Destino:</b> ${corrida.destinoLat}, ${corrida.destinoLng}</p>
-        <button onclick="aceitarCorrida('${corrida.id}')">
-          Aceitar
-        </button>
-      `;
+
+<h3>🚖 Nova Corrida</h3>
+
+<p><b>📍 Origem</b></p>
+<p>${corrida.origemLat.toFixed(6)}</p>
+<p>${corrida.origemLng.toFixed(6)}</p>
+
+<hr>
+
+<p><b>🏁 Destino</b></p>
+<p>${corrida.destinoLat.toFixed(6)}</p>
+<p>${corrida.destinoLng.toFixed(6)}</p>
+
+<button onclick="verDestino(
+${corrida.destinoLat},
+${corrida.destinoLng}
+)">
+🗺 Ver Destino
+</button>
+
+<button onclick="aceitarCorrida('${corrida.id}')">
+✅ Aceitar
+</button>
+
+<button onclick="recusarCorrida('${corrida.id}')">
+❌ Recusar
+</button>
+
+`;
 
       listaCorridas.appendChild(div);
 
@@ -157,6 +180,31 @@ window.aceitarCorrida = async (id) => {
 
   alert("Corrida aceita!");
 };
+
+window.verDestino = (lat,lng)=>{
+
+    map.setView([lat,lng],18);
+
+    L.popup()
+    .setLatLng([lat,lng])
+    .setContent("🏁 Destino do passageiro")
+    .openOn(map);
+
+}
+
+window.recusarCorrida = async(id)=>{
+
+    const confirmar = confirm("Recusar esta corrida?");
+
+    if(!confirmar) return;
+
+    await updateDoc(doc(db,"corridas",id),{
+
+        status:"recusada"
+
+    });
+
+}
 
 /* =========================
    ESCUTAR CORRIDA ATIVA
